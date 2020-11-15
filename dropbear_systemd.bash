@@ -19,14 +19,14 @@ grep -q bullseye /etc/os-release && type='ed25519' size= || type='ecdsa' size=52
 dropbearkey -t $type -f /etc/dropbear/dropbear_${type}_host_key ${size:+-s $size}
 
 # Create systemd unit
-cat << '_EOF_' > /etc/systemd/system/dropbear.service
+cat << _EOF_ > /etc/systemd/system/dropbear.service
 [Unit]
 Description=Dropbear
 Wants=network-online.target
 After=network-online.target
 
 [Service]
-ExecStart=/usr/sbin/dropbear -Fsr '/etc/dropbear/dropbear_ed25519_host_key' -P ''
+ExecStart=/usr/sbin/dropbear -Fsr '/etc/dropbear/dropbear_${type}_host_key' -P ''
 
 [Install]
 WantedBy=multi-user.target
