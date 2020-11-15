@@ -15,7 +15,8 @@ apt-get -qq install --no-install-recommends dropbear-bin
 
 # Create Ed25519 host key
 mkdir -p /etc/dropbear
-dropbearkey -t ed25519 -f /etc/dropbear/dropbear_ed25519_host_key -s 521
+grep -q bullseye /etc/os-release && type='ed25519' size= || type='ecdsa' size=521
+dropbearkey -t $type -f /etc/dropbear/dropbear_${type}_host_key ${size:+-s $size}
 
 # Create systemd unit
 cat << '_EOF_' > /etc/systemd/system/dropbear.service
