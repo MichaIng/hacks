@@ -1,4 +1,5 @@
 # Add timestamps to shell command prompts
+# shellcheck disable=SC2154
 PS1='\D{%F %T} ${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
 
 # Colorize "ls" command
