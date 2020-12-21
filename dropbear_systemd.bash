@@ -4,6 +4,7 @@
 {
 # Remove obsolete SysV and upstart files
 dpkg-query -s dropbear-run > /dev/null 2>&1 && { apt-get -qq purge dropbear-run || exit 1; }
+dpkg-query -s dropbear > /dev/null 2>&1 && { apt-get -qq purge dropbear-run || exit 1; }
 
 # Assure up-to-date Dropbear binary is installed
 apt-get -q update || exit 1
