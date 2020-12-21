@@ -1,25 +1,25 @@
-#!/bin/bash
+#!/bin/dash
 # Create Dropbear systemd unit with Ed25519 host key
 # Created by MichaIng / micha@dietpi.com / dietpi.com
 {
 # Remove obsolete SysV and upstart files
-dpkg-query -s dropbear-run &> /dev/null && apt-get -qq purge dropbear-run
+dpkg-query -s dropbear-run > /dev/null 2>&1 && { apt-get -qq purge dropbear-run || exit 1; }
 
 # Assure up-to-date Dropbear binary is installed
-apt-get -q update
-apt-get -qq install --no-install-recommends dropbear-bin
+apt-get -q update || exit 1
+apt-get -qq install --no-install-recommends dropbear-bin || exit 1
 
 # Remove obsolete files
-[[ -d '/etc/dropbear' ]] && rm -Rv /etc/dropbear
-[[ -f '/etc/default/dropbear' ]] && rm -v /etc/default/dropbear
+[ -d '/etc/dropbear' ] && { rm -Rv /etc/dropbear || exit 1; }
+[ -f '/etc/default/dropbear' ] && { rm -v /etc/default/dropbear || exit 1; }
 
 # Create Ed25519 host key
-mkdir -p /etc/dropbear
+mkdir -p /etc/dropbear || exit 1
 grep -q bullseye /etc/os-release && type='ed25519' size= || type='ecdsa' size=521
-dropbearkey -t $type -f /etc/dropbear/dropbear_${type}_host_key ${size:+-s $size}
+dropbearkey -t $type -f /etc/dropbear/dropbear_${type}_host_key ${size:+-s $size} || exit 1
 
 # Create systemd unit
-cat << _EOF_ > /etc/systemd/system/dropbear.service
+cat << _EOF_ > /etc/systemd/system/dropbear.service || exit 1
 [Unit]
 Description=Dropbear
 Wants=network-online.target
@@ -33,6 +33,6 @@ WantedBy=multi-user.target
 _EOF_
 
 # Start service
-systemctl daemon-reload
-systemctl restart dropbear
+systemctl daemon-reload || exit 1
+systemctl restart dropbear || exit 1
 }
