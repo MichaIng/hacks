@@ -35,5 +35,8 @@ _EOF_
 
 # Start service
 systemctl daemon-reload || exit 1
+systemctl disable dropbear # Remove obsolete symlinks
+update-rc.d dropbear remove # Remove /etc/init.d symlinks
+systemctl enable dropbear || exit 1
 systemctl restart dropbear || exit 1
 }
