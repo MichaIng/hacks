@@ -2,8 +2,6 @@
 # Install acme.sh and issue a 384-bit ECC certificate + auto renewal cron job
 # Input argument $1 = domain
 {
-DOMAIN=$1
-
 mkdir -p /opt/acme.sh || exit 1
 cd /opt/acme.sh || exit 1
 curl -sSfLO https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh || exit 1
