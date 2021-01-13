@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/dash
 # Install and setup GNU Screen for SSH sessions
 # Created by MichaIng / micha@dietpi.com / dietpi.com
 {
