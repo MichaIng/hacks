@@ -36,6 +36,6 @@ _EOF_
 # Automatically start screen on SSH sessions
 cat << '_EOF_' > /etc/profile.d/00-micha.sh
 # Autostart screen and auto logout
-[ "$TERM" == 'screen' ] || exec screen -U -S sshscreen -d -R
+[ "$TERM" = 'screen' ] || exec screen -U -S sshscreen -d -R
 _EOF_
 }
