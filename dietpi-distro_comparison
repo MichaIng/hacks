@@ -11,11 +11,11 @@
 # First of all, we bring the OS onto current package state and disable possibly generated swap files to make the comparison fair.
 if [[ ! -f '/dietpi-distro_comparison.flag' ]]
 then
-	echo 'Upgrading all APT packages and removing all swap files...
-NB: A flag file will be created to skip this on next script execution.'
+	echo -e '\nUpgrading all APT packages and removing all swap files...
+NB: A flag file will be created to skip this on next script execution.\n'
 
 	# Disabling Bluetooth which leads to handing boot on RPi's without onboard Bluetooth
-	systemctl is-failed hciuart && systemctl disable --now hciuart
+	systemctl is-failed hciuart &> /dev/null && systemctl disable --now hciuart
 
 	apt update
 	apt full-upgrade
@@ -29,16 +29,17 @@ NB: A flag file will be created to skip this on next script execution.'
 	done < <(swapon --show NAME --noheadings | mawk '{print $1}')
 	command -v dphys-swapfile > /dev/null && dphys-swapfile uninstall
 	[[ -f '/boot/dietpi/func/dietpi-set_swapfile' ]] && /boot/dietpi/func/dietpi-set_swapfile 0
-	sed -i '/[[:blank:]]swap[[:blank]]/d' /etc/fstab
+	sed -i '/[[:blank:]]swap[[:blank:]]/d' /etc/fstab
 
 	> /dietpi-distro_comparison.flag
 	read -rp 'The system will now reboot, press any key to continue...'
+	reboot
 fi
 
 # Disk usage
 echo 'Root file system disk usage: "findmnt -no USED /"'
 findmnt -no USED /
-findmnt /boot > /dev/null && && { echo 'Boot file system disk usage: "findmnt -no USED /boot"'; findmnt -no USED /boot; }
+findmnt /boot > /dev/null && { echo 'Boot file system disk usage: "findmnt -no USED /boot"'; findmnt -no USED /boot; }
 
 echo
 
