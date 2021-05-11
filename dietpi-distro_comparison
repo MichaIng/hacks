@@ -1,0 +1,97 @@
+#!/bin/bash
+# This script runs a few commands to check resource usage and performance stats.
+# It aims to make the comparison of different OS/distro images against each other easy and transparent.
+# It aims to replace the very outdated DietPi spreadsheet and comparisons, done in the past:
+# - https://docs.google.com/spreadsheets/d/1mDHGZC-H6tU6_O8kuLTG8d4A8Nt7lV1Q7MXTR_6qw30/edit#gid=0
+# - https://dietpi.com/phpbb/viewtopic.php?t=262
+
+# NB: Source this file to avoid spawning an additional subshell:
+# . ./dietpi-distro_comparison
+
+# First of all, we bring the OS onto current package state and disable possibly generated swap files to make the comparison fair.
+if [[ ! -f '/dietpi-distro_comparison.flag' ]]
+then
+	echo 'Upgrading all APT packages and removing all swap files...
+NB: A flag file will be created to skip this on next script execution.'
+
+	# Disabling Bluetooth which leads to handing boot on RPi's without onboard Bluetooth
+	systemctl is-failed hciuart && systemctl disable --now hciuart
+
+	apt update
+	apt full-upgrade
+	apt autoremove
+
+	while read -r file
+	do
+		swapoff "$file"
+		[[ -f $file ]] && rm -v "$file"
+
+	done < <(swapon --show NAME --noheadings | mawk '{print $1}')
+	command -v dphys-swapfile > /dev/null && dphys-swapfile uninstall
+	[[ -f '/boot/dietpi/func/dietpi-set_swapfile' ]] && /boot/dietpi/func/dietpi-set_swapfile 0
+	sed -i '/[[:blank:]]swap[[:blank]]/d' /etc/fstab
+
+	> /dietpi-distro_comparison.flag
+	read -rp 'The system will now reboot, press any key to continue...'
+fi
+
+# Disk usage
+echo 'Root file system disk usage: "findmnt -no USED /"'
+findmnt -no USED /
+findmnt /boot > /dev/null && && { echo 'Boot file system disk usage: "findmnt -no USED /boot"'; findmnt -no USED /boot; }
+
+echo
+
+# Memory usage
+echo 'Total memory usage: "free -th | mawk '\''/^Total:/{print $3}'\''"'
+free -th | mawk '/^Total:/{print $3}'
+
+echo
+
+# Pre-installed packages
+echo 'Number of pre-installed DEB packages: "dpkg --get-selections | wc -l"'
+dpkg --get-selections | wc -l
+
+echo
+
+# Processes
+echo 'Number of running processes: "echo $(( $(pstree -Ta | wc -l) - 3 ))" (minus echo, pstree and wc)'
+echo $(( $(pstree -Ta | wc -l) - 3 ))
+
+echo
+
+# Boot duration
+echo 'Boot duration: "systemd-analyze | mawk '\''{print $(NF-1)" "$NF;exit}'\''"'
+systemd-analyze | mawk '{print $(NF-1)" "$NF;exit}'
+
+echo
+
+# Check if /tmp is a tmpfs
+if [[ $(findmnt -no FSTYPE /tmp) == 'tmpfs' ]]
+then
+	echo '/tmp is a tmpfs, which is good to reduce disk I/O'
+else
+	echo '/tmp is not a tmpfs, which is bad since volatile files lead to disk I/O'
+fi
+
+echo
+
+# Check if /tmp is a tmpfs
+if [[ $(findmnt -no FSTYPE /var/log) == 'tmpfs' ]]
+then
+	echo '/var/log is a tmpfs, which is good to reduce disk I/O, but logs are lost on system crash'
+else
+	echo '/var/log is not a tmpfs, which is bad for disk I/O, but logs are preserved on system crash'
+fi
+
+echo
+
+# SSH
+if ss -tuln | grep -q ':22'
+then
+	echo 'This image comes with an SSH server pre-installed'
+else
+	echo 'This image has no SSH server pre-installed'
+fi
+
+echo
