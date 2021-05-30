@@ -44,6 +44,7 @@ findmnt /boot > /dev/null && { echo 'Boot filesystem disk usage: "findmnt -no US
 echo
 
 # Memory usage
+# shellcheck disable=SC2016
 echo 'Total memory usage: "free -th | mawk '\''/^Total:/{print $3}'\''"'
 free -th | mawk '/^Total:/{print $3}'
 
@@ -56,12 +57,14 @@ dpkg --get-selections | wc -l
 echo
 
 # Processes
+# shellcheck disable=SC2016
 echo 'Number of running processes: "echo $(( $(pstree -Ta | wc -l) - 3 ))" (minus echo, pstree and wc)'
 echo $(( $(pstree -Ta | wc -l) - 3 ))
 
 echo
 
 # Boot duration
+# shellcheck disable=SC2016
 echo 'Boot duration: "systemd-analyze | mawk '\''{print $(NF-1)" "$NF;exit}'\''"'
 systemd-analyze | mawk '{print $(NF-1)" "$NF;exit}'
 
