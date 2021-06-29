@@ -4,7 +4,7 @@
 {
 # Install Screen
 apt-get -q update
-apt-get -qq --no-install-recommends screen
+apt-get -qq --no-install-recommends install screen
 
 # Disable startup message
 sed -i '/^[[:blank:]#]*startup_message/c\#startup_message off' /etc/screenrc
