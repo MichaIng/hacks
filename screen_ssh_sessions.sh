@@ -38,4 +38,8 @@ cat << '_EOF_' > /etc/profile.d/00-micha.sh
 # Autostart screen and auto logout
 [ "$TERM" = 'screen' ] || exec screen -U -S sshscreen -d -R
 _EOF_
+
+# Use dash as default shell to reduce overhead before screen is loaded
+usermod -s /bin/dash root
+getent passwd dietpi > /dev/null && usermod -s /bin/dash dietpi
 }
