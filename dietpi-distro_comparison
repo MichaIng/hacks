@@ -8,13 +8,30 @@
 # NB: Source this file to avoid spawning an additional subshell:
 # . ./dietpi-distro_comparison
 
+# Wait for boot/login tasks to finish
+while pgrep -f 'postboot' > /dev/null
+do
+	echo 'Waiting for DietPi-Postboot to finish'
+	sleep 1
+done
+while pgrep -f 'dietpi-update'
+do
+	echo 'Waiting for DietPi-Update to finish'
+	sleep 1
+done
+while pgrep -f 'apt-get'
+do
+	echo 'Waiting for APT calls to finish'
+	sleep 1
+done
+
 # First of all, we bring the OS onto current package state and disable possibly generated swap files to make the comparison fair.
 if [[ ! -f '/dietpi-distro_comparison.flag' ]]
 then
 	echo -e '\nUpgrading all APT packages and removing all swap files...
 NB: A flag file will be created to skip this on next script execution.\n'
 
-	# Disabling Bluetooth which leads to handing boot on RPi's without onboard Bluetooth
+	# Disabling Bluetooth which leads to hanging boot on RPi's without onboard Bluetooth
 	systemctl is-failed hciuart &> /dev/null && systemctl disable --now hciuart
 
 	apt update
@@ -37,9 +54,17 @@ NB: A flag file will be created to skip this on next script execution.\n'
 fi
 
 # Disk usage
-echo 'Root filesystem disk usage: "findmnt -no USED /"'
-findmnt -no USED /
-findmnt /boot > /dev/null && { echo 'Boot filesystem disk usage: "findmnt -no USED /boot"'; findmnt -no USED /boot; }
+total=0
+for i in / /boot /boot/efi
+do
+	size=$(findmnt -nbo USED "$i")
+	(( $size )) || continue
+	echo "$i filesystem disk usage: \"findmnt -nbo USED $i\""
+	echo "$size bytes"
+	((total+=size))
+do
+echo "Total disk usage:"
+echo "$((total/1024**2)) MiB"
 
 echo
 
