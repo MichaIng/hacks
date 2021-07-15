@@ -62,7 +62,7 @@ do
 	echo "$i filesystem disk usage: \"findmnt -nbo USED $i\""
 	echo "$size bytes"
 	((total+=size))
-do
+done
 echo "Total disk usage:"
 echo "$((total/1024**2)) MiB"
 
