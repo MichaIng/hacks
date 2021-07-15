@@ -34,9 +34,9 @@ NB: A flag file will be created to skip this on next script execution.\n'
 	# Disabling Bluetooth which leads to hanging boot on RPi's without onboard Bluetooth
 	systemctl is-failed hciuart &> /dev/null && systemctl disable --now hciuart
 
-	apt update
-	apt full-upgrade
-	apt autoremove
+	apt-get -y update
+	apt-get -y dist-upgrade
+	apt-get -y autopurge
 
 	while read -r file
 	do
