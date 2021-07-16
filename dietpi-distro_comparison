@@ -5,8 +5,14 @@
 # - https://docs.google.com/spreadsheets/d/1mDHGZC-H6tU6_O8kuLTG8d4A8Nt7lV1Q7MXTR_6qw30/edit#gid=0
 # - https://dietpi.com/phpbb/viewtopic.php?t=262
 
-# NB: Source this file to avoid spawning an additional subshell:
-# . ./dietpi-distro_comparison
+### IMPORTANT ###
+# Execution instructions to assure fair, comparable and reproducible results on all tests:
+# - Keep image, boot and system configs untouched, when possible, e.g. DHCP and CPU frequencies.
+# - Only when there are significant differences, like one image necessarily requires a static IP to be set, do the same on DietPi via dietpi.txt, to make it better comparable.
+# - Use the same console to run the script on both systems, e.g. local console, SSH or serial console.
+# - Source the script, instead of executing it, to avoid additional processes and RAM usage for the script execution itself:
+#     curl -sSfLO https://raw.githubusercontent.com/MichaIng/hacks/main/dietpi-distro_comparison
+#     . ./dietpi-distro_comparison
 
 # Wait for boot/login tasks to finish
 while pgrep -f 'postboot' > /dev/null
