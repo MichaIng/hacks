@@ -4,15 +4,15 @@
 {
 mkdir -p /opt/acme.sh || exit 1
 cd /opt/acme.sh || exit 1
-curl -sSfLO https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh || exit 1
+curl -sSfLO 'https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh' || exit 1
 chmod +x acme.sh || exit 1
-./acme.sh --issue --home /opt/acme.sh -d "$1" -w /var/www -k ec-384 --ocsp || exit 1
+./acme.sh --issue --home /opt/acme.sh -d "$1" -w /var/www -k 'ec-384' --ocsp --server 'letsencrypt' || exit 1
 cat << '_EOF_' > /etc/cron.daily/micha-acme_sh
 #!/bin/dash
 {
 # Update acme.sh
 echo "[$(date)] INFO: Updating acme.sh update..."
-curl -sSfL https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh > /opt/acme.sh/acme.sh || { echo "[$(date)] ERROR: Failed to download acme.sh"; exit 1; }
+curl -sSfL 'https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh' -o /opt/acme.sh/acme.sh || { echo "[$(date)] ERROR: Failed to download acme.sh"; exit 1; }
 echo "[$(date)] DONE: acme.sh version is: $(sed -n '/^VER=/{s/^VER=//p;q}' /opt/acme.sh/acme.sh)"
 
 # Renew certificate
