@@ -31,7 +31,7 @@ trap G_EXIT_CUSTOM EXIT
 
 # Create loop device and fsck
 G_EXEC losetup -f "$FP_IMG"
-if [[ $(blkid -s PTTYPE -o value -c /dev/null $LOOP_DEV) == 'gpt' ]]
+if [[ $(blkid -s PTTYPE -o value -c /dev/null "$LOOP_DEV") == 'gpt' ]]
 then
 	G_AG_CHECK_INSTALL_PREREQ gdisk
 	G_EXEC sgdisk -e "$LOOP_DEV"
@@ -47,7 +47,7 @@ if (( $FS_IMG && $(stat -c %s "$FP_IMG") < $FS_IMG*1024*1024*1024 ))
 then
 	G_EXEC truncate -s $(($FS_IMG*1024*1024*1024)) "$FP_IMG"
 	G_EXEC losetup -c "$LOOP_DEV"
-	sfdisk -fN${ROOT_DEV: -1} "$LOOP_DEV" <<< ',+' || exit 1
+	sfdisk -fN"${ROOT_DEV: -1}" "$LOOP_DEV" <<< ',+' || exit 1
 	G_EXEC partprobe "$LOOP_DEV"
 	G_EXEC partx -u "$LOOP_DEV"
 	G_EXEC_OUTPUT=1 G_EXEC resize2fs "$ROOT_DEV"
