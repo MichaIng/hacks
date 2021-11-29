@@ -76,11 +76,10 @@ ln -s /dev/null m/etc/systemd/system/dropbear.service
 G_EXEC systemctl unmask dbus.socket dbus
 G_EXEC systemctl start dbus.socket dbus
 # Bind mounts required to allow container reading its own mount info
-# CAP_IPC_LOCK required for mlock/mlockall, used by vmtouch
 abinds=()
 #abinds=('--bind=/dev/fb0' '--bind=/dev/dri' '--bind=/dev/tty1')
 #abinds=('--bind=/dev/gpiochip0' '--bind=/dev/gpiomem' '--bind=/sys/class/gpio' '--bind=/sys/devices/platform/soc/3f200000.gpio')
-systemd-nspawn -bD m --bind="$LOOP_DEV" --bind="$ROOT_DEV" ${BOOT_DEV:+--bind="$BOOT_DEV"} --bind=/dev/disk --capability=CAP_IPC_LOCK "${abinds[@]}"
+systemd-nspawn -bD m --bind="$LOOP_DEV" --bind="$ROOT_DEV" ${BOOT_DEV:+--bind="$BOOT_DEV"} --bind=/dev/disk "${abinds[@]}"
 
 exit 0
 }
