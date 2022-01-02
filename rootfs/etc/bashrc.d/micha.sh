@@ -2,7 +2,7 @@
 # shellcheck disable=SC2154
 PS1='\D{%F %T} ${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
 
-# Colorize "ls" command
+# Colorise "ls" command output
 eval "$(dircolors)"
 alias ls='ls -A --color=auto'
 alias l='ls -lh'
