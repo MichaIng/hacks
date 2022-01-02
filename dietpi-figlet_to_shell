@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Convert figlet output fonts to shell arrays, stored in ./font_matrix
+
+# Loop through all characters we need
+for c in {a..z} {A..Z} {0..9} . -
+do
+	# Convert character to array name
+	v=${c/[0-9]/n$c}
+	v=${v/\./dot}
+	v=${v/-/dash}
+	# Declare local array
+	echo "local $v=("
+	# Escape single quotes and wrap each line as array value in single quotes
+	figlet "$c" | sed -e "s/'/'\\\''/" -e "s/^/'/" -e "s/$/'/"
+	# End array
+	echo ')'
+
+done > font_matrix
