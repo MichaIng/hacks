@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2034,SC1003
 
 # Declare as function to allow local variables
 print_large()
@@ -540,7 +541,7 @@ do
 	for line in {0..5}
 	do
 		# Assign array name with line index to variable for indirect expansion
-		var="$char[$line]"
+		var="${char}[$line]"
 		# Append to output line
 	        output[$line]+=${!var}
 	done
@@ -552,4 +553,5 @@ printf '%s\n' "${output[@]}"
 }
 
 # Check for invalid input characters
+# shellcheck disable=SC2015
 [[ $1 == *[^[:alnum:].-]* ]] && echo 'ERROR: Character outside of range "a-zA-Z0-9.-" found. Aborting...' || print_large "$1"
