@@ -20,11 +20,11 @@ sed -i '/^[[:blank:]#]*termcapinfo xterm|xterms|xs|rxvt ti@:te@$/c\termcapinfo x
 # Additions
 cat << '_EOF_' >> /etc/screenrc
 # ------------------------------------------------------------------------------
-# MICHAS ADDITIONS
+# MICHA'S ADDITIONS
 # ------------------------------------------------------------------------------
 
-# Start screen as login shell to read /etc/profile[.d/]
-shell -/bin/bash
+# Use bash shell
+shell /bin/bash
 
 # Remove whiptail/pager content after closing
 altscreen on
@@ -35,7 +35,7 @@ _EOF_
 
 # Automatically start screen on SSH sessions
 cat << '_EOF_' > /etc/profile.d/00-micha.sh
-# Autostart screen and auto logout
+# Autostart screen and auto logout on detach
 [ "$TERM" = 'screen' ] || exec screen -U -S sshscreen -d -R
 _EOF_
 
