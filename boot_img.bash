@@ -39,19 +39,19 @@ fi
 G_EXEC partprobe "$LOOP_DEV"
 G_EXEC partx -u "$LOOP_DEV"
 [[ -b ${LOOP_DEV}p2 ]] && BOOT_DEV="${LOOP_DEV}p1" || ROOT_DEV="${LOOP_DEV}p1"
-e2fsck -f "$ROOT_DEV" || exit 1
-[[ $BOOT_DEV ]] && { fsck "$BOOT_DEV" || exit 1; }
+G_EXEC_OUTPUT=1 G_EXEC e2fsck -f "$ROOT_DEV"
+[[ $BOOT_DEV ]] && G_EXEC_OUTPUT=1 G_EXEC fsck "$BOOT_DEV"
 
 # Raise image+partition+fs size if required, always run fsck
 if (( $FS_IMG && $(stat -c %s "$FP_IMG") < $FS_IMG*1024*1024*1024 ))
 then
 	G_EXEC truncate -s $(($FS_IMG*1024*1024*1024)) "$FP_IMG"
 	G_EXEC losetup -c "$LOOP_DEV"
-	sfdisk -fN"${ROOT_DEV: -1}" "$LOOP_DEV" <<< ',+' || exit 1
+	G_EXEC_OUTPUT=1 G_EXEC eval "sfdisk -fN'${ROOT_DEV: -1}' '$LOOP_DEV' <<< ',+'"
 	G_EXEC partprobe "$LOOP_DEV"
 	G_EXEC partx -u "$LOOP_DEV"
 	G_EXEC_OUTPUT=1 G_EXEC resize2fs "$ROOT_DEV"
-	e2fsck -f "$ROOT_DEV" || exit 1
+	G_EXEC_OUTPUT=1 G_EXEC e2fsck -f "$ROOT_DEV"
 fi
 
 # Mount
@@ -61,11 +61,11 @@ G_EXEC mount "$ROOT_DEV" m
 [[ $BOOT_DEV ]] && G_EXEC mount "$BOOT_DEV" m/boot
 
 # Workarounds
-# - Allow root login on pts/0, required until Buster currently, on Bullseye /etc/securetty has been removed
+# - Allow root login on pts/0, required until Buster, on Bullseye /etc/securetty has been removed
 [[ -f 'm/etc/securetty' ]] && ! grep '^pts/0' m/etc/securetty && echo 'pts/0' >> m/etc/securetty && remove_pts=1
 # - RPi on non-RPi: Move raspi-copies-and-fills ARM-specific mem*-versions out of the way
 [[ $G_HW_MODEL -gt 9 && -f 'm/etc/ld.so.preload' ]] && G_EXEC mv m/etc/ld.so.preload{,_bak}
-# - Mask Dropbear to prevent its package install to fail
+# - Mask Dropbear to prevent its package install from failing
 ln -s /dev/null m/etc/systemd/system/dropbear.service
 # - Remount /tmp tmpfs as it does not mount with intended size automatically somehow
 [[ -d 'm/var/lib/dietpi/postboot.d' ]] && echo -e '#!/bin/dash\nmount -o remount /tmp' > m/var/lib/dietpi/postboot.d/micha-remount_tmp.sh
