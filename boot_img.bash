@@ -34,8 +34,8 @@ G_EXEC losetup "$LOOP_DEV" "$FP_IMG"
 G_EXEC partprobe "$LOOP_DEV"
 G_EXEC partx -u "$LOOP_DEV"
 [[ -b ${LOOP_DEV}p2 ]] && BOOT_DEV="${LOOP_DEV}p1" || ROOT_DEV="${LOOP_DEV}p1"
-G_EXEC_OUTPUT=1 G_EXEC e2fsck -f "$ROOT_DEV"
-[[ $BOOT_DEV ]] && G_EXEC_OUTPUT=1 G_EXEC fsck "$BOOT_DEV"
+G_EXEC_OUTPUT=1 G_EXEC e2fsck -fp "$ROOT_DEV"
+[[ $BOOT_DEV ]] && G_EXEC_OUTPUT=1 G_EXEC fsck -p "$BOOT_DEV"
 
 # Raise image+partition+fs size if required, always run fsck
 if (( $FS_IMG && $(stat -c %s "$FP_IMG") < $FS_IMG*1024*1024*1024 ))
@@ -51,7 +51,7 @@ then
 	G_EXEC partprobe "$LOOP_DEV"
 	G_EXEC partx -u "$LOOP_DEV"
 	G_EXEC_OUTPUT=1 G_EXEC resize2fs "$ROOT_DEV"
-	G_EXEC_OUTPUT=1 G_EXEC e2fsck -f "$ROOT_DEV"
+	G_EXEC_OUTPUT=1 G_EXEC e2fsck -fp "$ROOT_DEV"
 fi
 
 # Mount
