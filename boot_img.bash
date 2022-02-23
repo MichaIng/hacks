@@ -2,14 +2,24 @@
 {
 . /boot/dietpi/func/dietpi-globals
 
-# Inputs: $1=img file, $2=img size (GiB, optional)
-FP_IMG=$1
+# Inputs: "-e"=edit dietpi.txt, $1=img file, $2=img size (GiB, optional, defaults to 2)
+EDIT_DIETPITXT=0
+FP_IMG=
+FS_IMG=
+while (( $# ))
+do
+	case $1 in
+		'-e') EDIT_DIETPITXT=1;;
+		*) [[ $FP_IMG ]] && FS_IMG=$1 || FP_IMG=$1;;
+	esac
+	shift
+done
 G_EXEC test -f "$FP_IMG"
-FS_IMG=${2:-2} # Assure 2 GiB minimum to allow e.g. DietPi-Software first run installs (500 MiB free space check)
+disable_error=1 G_CHECK_VALIDINT "$FS_IMG" 0 || FS_IMG=2
 
 # Install QEMU emulation support only when running from non-RPi host, else assume we're going to build for armhf anyway
-(( $G_HW_MODEL > 9 )) && emulation_packages=('binfmt-support' 'qemu-user-static') || emulation_packages=()
-G_AG_CHECK_INSTALL_PREREQ fdisk parted dosfstools dbus systemd-container "${emulation_packages[@]}"
+(( $G_HW_MODEL > 9 )) && emulation_packages=('qemu-user-static' 'binfmt-support') || emulation_packages=()
+G_AG_CHECK_INSTALL_PREREQ parted fdisk dosfstools dbus systemd-container "${emulation_packages[@]}"
 LOOP_DEV=$(losetup -f)
 ROOT_DEV="${LOOP_DEV}p2"
 
@@ -60,6 +70,9 @@ findmnt -M m &> /dev/null && G_EXEC umount -R m
 G_EXEC mount "$ROOT_DEV" m
 [[ $BOOT_DEV ]] && G_EXEC mount "$BOOT_DEV" m/boot
 
+# Edit dietpi.txt if requested
+(( $EDIT_DIETPITXT )) && nano m/boot/dietpi.txt
+
 # Workarounds
 # - Allow root login on pts/0, required until Buster, on Bullseye /etc/securetty has been removed
 [[ -f 'm/etc/securetty' ]] && ! grep '^pts/0' m/etc/securetty && echo 'pts/0' >> m/etc/securetty && remove_pts=1
@@ -77,8 +90,8 @@ G_EXEC systemctl unmask dbus.socket dbus
 G_EXEC systemctl start dbus.socket dbus
 # Bind mounts required to allow container reading its own mount info
 abinds=()
-#abinds=('--bind=/dev/fb0' '--bind=/dev/dri' '--bind=/dev/tty1')
-#abinds=('--bind=/dev/gpiochip0' '--bind=/dev/gpiomem' '--bind=/sys/class/gpio' '--bind=/sys/devices/platform/soc/3f200000.gpio')
+#abinds+=('--bind=/dev/fb0' '--bind=/dev/dri' '--bind=/dev/tty1')
+#abinds+=('--bind=/dev/gpiochip0' '--bind=/dev/gpiomem' '--bind=/sys/class/gpio' '--bind=/sys/devices/platform/soc/3f200000.gpio')
 systemd-nspawn -bD m --bind="$LOOP_DEV" --bind="$ROOT_DEV" ${BOOT_DEV:+--bind="$BOOT_DEV"} --bind=/dev/disk "${abinds[@]}"
 
 exit 0
