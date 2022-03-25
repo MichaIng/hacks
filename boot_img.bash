@@ -82,8 +82,6 @@ G_EXEC mount "$ROOT_DEV" m
 ln -s /dev/null m/etc/systemd/system/dropbear.service
 # - Remount /tmp tmpfs as it does not mount with intended size automatically somehow
 [[ -d 'm/var/lib/dietpi/postboot.d' ]] && echo -e '#!/bin/dash\nmount -o remount /tmp' > m/var/lib/dietpi/postboot.d/micha-remount_tmp.sh
-# - Avoid waiting for systemd-timesyncd which cannot start within containers
-[[ -f 'm/boot/dietpi.txt' ]] && G_CONFIG_INJECT 'CONFIG_NTP_MODE=' 'CONFIG_NTP_MODE=0' m/boot/dietpi.txt
 
 # dbus required for container spawn
 G_EXEC systemctl unmask dbus.socket dbus
