@@ -27,7 +27,8 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
-ExecStart=/usr/sbin/dropbear -Fsr '/etc/dropbear/dropbear_${type}_host_key' -P ''
+ExecStart=/usr/sbin/dropbear -EFsr '/etc/dropbear/dropbear_${type}_host_key' -P ''
+KillMode=process
 
 [Install]
 WantedBy=multi-user.target
