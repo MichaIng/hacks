@@ -36,7 +36,7 @@ _EOF_
 # Automatically start screen on SSH sessions
 cat << '_EOF_' > /etc/profile.d/00-micha.sh
 # Autostart screen and auto logout on detach
-[ "$TERM" = 'screen' ] || exec screen -U -S sshscreen -d -R
+[ -z "$SSH_TTY" ] || [ "$TERM" = 'screen' ] || exec screen -U -S sshscreen -d -R
 _EOF_
 
 # Use dash as default shell to reduce overhead before screen is loaded
