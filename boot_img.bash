@@ -28,8 +28,8 @@ G_EXIT_CUSTOM()
 	G_EXEC systemctl mask --now dbus dbus.socket
 
 	# Revert workarounds
-	(( $remove_pts )) && sed -i '/^pts\/0/d' m/etc/securetty
-	G_EXEC rm -f m/etc/{systemd/system/dropbear.service,ld.so.preload_bak} m/var/lib/dietpi/postboot.d/micha-remount_tmp.sh
+	(( $remove_pts )) && sed -i '/^pts\/0$/d' m/etc/securetty
+	G_EXEC rm -f m/etc/systemd/system/dropbear.service m/var/lib/dietpi/postboot.d/micha-remount_tmp.sh
 
 	# Cleanup
 	findmnt -M m > /dev/null && G_EXEC umount -Rl m
@@ -74,7 +74,7 @@ G_EXEC mount "$ROOT_DEV" m
 
 # Workarounds
 # - Allow root login on pts/0, required until Buster, on Bullseye /etc/securetty has been removed
-[[ -f 'm/etc/securetty' ]] && ! grep '^pts/0' m/etc/securetty && echo 'pts/0' >> m/etc/securetty && remove_pts=1
+[[ -f 'm/etc/securetty' ]] && ! grep '^pts/0$' m/etc/securetty && echo 'pts/0' >> m/etc/securetty && remove_pts=1
 # - Mask Dropbear to prevent its package install from failing
 ln -s /dev/null m/etc/systemd/system/dropbear.service
 # - Remount /tmp tmpfs as it does not mount with intended size automatically somehow
