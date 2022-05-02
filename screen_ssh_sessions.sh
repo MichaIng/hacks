@@ -10,7 +10,7 @@ apt-get -y --no-install-recommends install screen
 sed -i '/^[[:blank:]#]*startup_message/c\#startup_message off' /etc/screenrc
 
 # Disable visual bell
-sed -i 's/^vbell/#vbell/' /etc/screenrc
+sed -i 's/^[[:blank:]]*vbell/#vbell/' /etc/screenrc
 
 # Disable hardstatus line
 sed -i 's/^[[:blank:]]*hardstatus[[:blank:]]/#hardstatus /' /etc/screenrc
