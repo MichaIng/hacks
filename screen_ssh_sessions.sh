@@ -3,8 +3,8 @@
 # Created by MichaIng / micha@dietpi.com / dietpi.com
 {
 # Install Screen
-apt-get -q update
-apt-get -qq --no-install-recommends install screen
+apt-get -y update
+apt-get -y --no-install-recommends install screen
 
 # Disable startup message
 sed -i '/^[[:blank:]#]*startup_message/c\#startup_message off' /etc/screenrc
