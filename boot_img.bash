@@ -17,8 +17,8 @@ done
 G_EXEC test -f "$FP_IMG"
 disable_error=1 G_CHECK_VALIDINT "$FS_IMG" 0 || FS_IMG=2
 
-# Install QEMU emulation support only when running from non-RPi host, else assume we're going to build for armhf anyway
-(( $G_HW_MODEL > 9 )) && emulation_packages=('qemu-user-static' 'binfmt-support') || emulation_packages=()
+# Install QEMU emulation support when running from x86_64 host
+(( $G_HW_ARCH == 10 )) && emulation_packages=('qemu-user-static' 'binfmt-support') || emulation_packages=()
 G_AG_CHECK_INSTALL_PREREQ parted fdisk dosfstools dbus systemd-container "${emulation_packages[@]}"
 LOOP_DEV=$(losetup -f)
 ROOT_DEV="${LOOP_DEV}p2"
