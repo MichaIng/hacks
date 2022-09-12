@@ -1,0 +1,133 @@
+# Exclude informational files
+# - /usr/share/doc required for changelogs => apt-listchanges
+path-exclude /usr/share/doc/*
+# - We need to keep copyright files for legal reasons
+path-exclude /usr/share/doc
+#path-include /usr/share/doc/*/copyright
+path-exclude /usr/share/doc-base/*
+path-exclude /usr/share/doc-base
+path-exclude /usr/share/groff/*
+path-exclude /usr/share/groff
+path-exclude /usr/share/info/*
+path-exclude /usr/share/info
+path-exclude /usr/share/linda/*
+path-exclude /usr/share/linda
+path-exclude /usr/share/lintian/*
+path-exclude /usr/share/lintian
+path-exclude /usr/share/man/*
+path-exclude /usr/share/man
+path-exclude /etc/alternatives/*.gz
+path-exclude /var/lib/dpkg/alternatives/*.gz
+
+# We use systemd for all services, hence skip SysV, upstart and supervisor services
+path-exclude /etc/init/*
+path-exclude /etc/init
+path-exclude /etc/init.d/*
+path-exclude /etc/init.d
+path-exclude /etc/insserv.conf.d/*
+path-exclude /etc/insserv.conf.d
+path-exclude /etc/sv/*
+path-exclude /etc/sv
+path-exclude /etc/runit/*
+path-exclude /etc/runit
+path-exclude /etc/default/mysql
+path-exclude /etc/default/dropbear
+path-exclude /etc/default/redis-server
+path-exclude /etc/default/rsync
+path-exclude /etc/default/coturn
+path-exclude /etc/default/fake-hwclock
+path-exclude /etc/default/dbus
+path-exclude /etc/rc*.d
+
+# X11 configs
+path-exclude /etc/X11/*
+path-exclude /etc/X11
+path-exclude /usr/share/X11/*
+path-exclude /usr/share/X11
+
+# DHCP
+path-exclude /etc/dhcp/*
+path-exclude /etc/dhcp
+
+# MOTD
+path-exclude /etc/update-motd.d/10-uname
+
+# We do not use /var/log, hence skip logrotate
+path-exclude /etc/logrotate.d/*
+path-exclude /etc/logrotate.d
+
+# Skeleton
+path-exclude /etc/skel/*
+
+# Issue
+path-exclude /etc/issue
+path-exclude /etc/issue.net
+
+# We do not use regular kernel packges, hence skip autoremove protection
+path-exclude /etc/apt/apt.conf.d/01autoremove
+path-exclude /etc/apt/apt.conf.d/01autoremove-kernel
+path-exclude /etc/kernel/postinst.d/apt-auto-removal
+
+# We have no apt-utils, hence skip debconf pre-configuration
+path-exclude /etc/apt/apt.conf.d/70debconf
+
+# Other APT files
+path-exclude /var/cache/apt/*
+path-exclude /var/cache/apt
+
+# Always ask for config file updates
+force-confask
+
+# RPi
+path-exclude /etc/ld.so.conf.d/00-vmcs.conf
+
+# bcm2709 cut-down firmware only
+path-exclude /boot/start*.elf
+path-include /boot/start_cd.elf
+path-exclude /boot/fixup*.dat
+path-include /boot/fixup_cd.dat
+path-exclude /boot/bcm27*.dtb
+path-include /boot/bcm2709-rpi-2-b.dtb
+path-exclude /boot/kernel*.img
+path-include /boot/kernel7.img
+path-exclude /lib/modules/*
+path-include /lib/modules/*-v7+
+path-include /lib/modules/*-v7+/*
+path-exclude /boot/overlays/*
+path-exclude /boot/COPYING.linux
+path-exclude /boot/LICENCE.broadcom
+path-exclude /usr/share/rpikernelhack/*
+path-exclude /usr/share/rpikernelhack
+
+# Obsolete cron jobs
+path-exclude /etc/cron.daily/apache2
+path-exclude /etc/cron.daily/apt-compat
+path-exclude /etc/cron.daily/dpkg
+path-exclude /etc/cron.d/e2scrub_all
+path-exclude /etc/cron.d/php
+
+# Locales
+path-exclude /usr/share/locale/*
+path-exclude /usr/share/locale
+path-exclude /etc/locale.alias
+
+# Apache configs
+path-exclude /etc/apache2/conf-available/*
+path-include /etc/apache2/conf-available/php*-fpm.conf
+path-exclude /etc/apache2/sites-available/*
+path-exclude /etc/apache2/mods-available/alias.conf
+path-exclude /usr/share/apache2/icons/*
+path-exclude /usr/share/apache2/icons
+path-exclude /var/www/html
+path-exclude /var/log/apache2
+path-exclude /var/cache/apache2/*
+path-exclude /var/cache/apache2
+path-exclude /etc/default/apache-htcacheclean
+
+# policykit
+path-exclude /var/lib/polkit-1/*
+path-exclude /var/lib/polkit-1
+
+# ufw
+path-exclude /etc/ufw/*
+path-exclude /etc/ufw
