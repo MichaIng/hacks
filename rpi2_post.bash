@@ -21,7 +21,7 @@ bash -c "$(curl -sSf 'https://raw.githubusercontent.com/MichaIng/hacks/main/scre
 
 # Configure Apache2
 G_EXEC_NOHALT=1 G_EXEC a2disconf security other-vhosts-access-log charset localized-error-pages serve-cgi-bin
-G_EXEC_NOHALT=1 G_EXEC a2dismod access_compat auth_basic authn_core authn_file authz_host authz_user autoindex filter info negotiation reqtimeout status deflate filter
+G_EXEC_NOHALT=1 G_EXEC a2dismod -f access_compat auth_basic authn_core authn_file authz_host authz_user autoindex filter info negotiation reqtimeout status deflate filter
 G_EXEC a2enmod rewrite headers dir env mime alias authz_core ssl
 
 G_EXEC curl -sSf 'https://raw.githubusercontent.com/MichaIng/hacks/main/rootfs/etc/apache2/conf-available/micha.conf.rpi2' -o /etc/apache2/conf-available/micha.conf
