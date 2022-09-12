@@ -5,7 +5,7 @@
 G_EXEC eval 'echo '\''deb https://deb.debian.org/debian/ bookworm main'\'' > /etc/apt/sources.list'
 
 # Purge locale
-G_AGP locale
+G_AGP locales
 G_EXEC eval 'echo '\''LANG=C.UTF-8'\'' > /etc/default/locale'
 G_EXEC_NOHALT=1 G_EXEC rm -R /usr/share/locale
 G_EXEC_NOHALT=1 G_EXEC rm /etc/locale.alias
@@ -26,3 +26,5 @@ G_EXEC a2enmod rewrite headers dir env mime alias authz_core ssl
 
 G_EXEC curl -sSf 'https://raw.githubusercontent.com/MichaIng/hacks/main/rootfs/etc/apache2/conf-available/micha.conf.rpi2' -o /etc/apache2/conf-available/micha.conf
 G_EXEC a2enconf micha
+
+G_AGP wireless-tools wireless-regdb wget wpasupplicant p7zip iw isc-dhcp-client firmware-realtek firmware-misc-nonfree firmware-linux-free firmware-iwlwifi firmware-brcm80211 firmware-atheros console-setup

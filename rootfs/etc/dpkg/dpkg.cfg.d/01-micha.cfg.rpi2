@@ -24,8 +24,6 @@ path-exclude /etc/init/*
 path-exclude /etc/init
 path-exclude /etc/init.d/*
 path-exclude /etc/init.d
-path-exclude /etc/insserv.conf.d/*
-path-exclude /etc/insserv.conf.d
 path-exclude /etc/sv/*
 path-exclude /etc/sv
 path-exclude /etc/runit/*
