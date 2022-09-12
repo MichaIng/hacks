@@ -16,6 +16,9 @@ G_EXEC curl -sSf 'https://raw.githubusercontent.com/MichaIng/hacks/main/rootfs/e
 # Configure Dropbear
 G_EXEC bash -c "$(curl -sSf 'https://raw.githubusercontent.com/MichaIng/hacks/main/dropbear_systemd.sh')"
 
+# Configure GNU/Screen
+G_EXEC bash -c "$(curl -sSf 'https://raw.githubusercontent.com/MichaIng/hacks/main/screen_ssh_sessions.sh')"
+
 # Configure Apache2
 G_EXEC_NOHALT=1 G_EXEC a2disconf security other-vhosts-access-log charset localized-error-pages serve-cgi-bin
 G_EXEC_NOHALT=1 G_EXEC a2dismod access_compat auth_basic authn_core authn_file authz_host authz_user autoindex filter info negotiation reqtimeout status deflate filter
