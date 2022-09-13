@@ -13,8 +13,9 @@ done
 # Deploy DPKG config
 [[ -f '/boot/dpkg.cfg.rpi2' ]] && G_EXEC mv /boot/dpkg.cfg.rpi2 /etc/dpkg/dpkg.cfg.d/01-micha
 
-# Purge non-required important/required/essential packages
-G_AGP --allow-remove-essential init install-info liblocale-gettext-perl libtext-charwidth-perl libtext-iconv-perl libtext-wrapi18n-perl base-passwd
+# Purge non-required important/required/essential and regular packages
+G_AGP --allow-remove-essential init install-info liblocale-gettext-perl libtext-charwidth-perl libtext-iconv-perl libtext-wrapi18n-perl base-passwd \
+wireless-tools wireless-regdb wget wpasupplicant iw isc-dhcp-client firmware-realtek firmware-misc-nonfree firmware-linux-free firmware-iwlwifi firmware-brcm80211 firmware-atheros
 
 # Remove non-required files
 G_EXEC_NOHALT=1 G_EXEC rm /etc/cron.d/e2scrub_all
