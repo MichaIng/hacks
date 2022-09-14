@@ -27,6 +27,9 @@ bash -c "$(curl -sSf 'https://raw.githubusercontent.com/MichaIng/hacks/main/drop
 # Configure GNU/Screen
 bash -c "$(curl -sSf 'https://raw.githubusercontent.com/MichaIng/hacks/main/screen_ssh_sessions.sh')"
 
+# Disable TTY1 console
+G_EXEC systemctl disable --now getty@tty1
+
 # Install SFTP server
 G_AGI gesftpserver
 #G_EXEC ln -s /usr/libexec/gesftpserver /usr/lib/openssh/sftp-server
