@@ -1,0 +1,20 @@
+[mysqld]
+# Skip PID file
+pid_file=/dev/null
+# systemd-journald logging
+skip_log_error=1
+# No TCP listener
+skip_name_resolve=1
+skip_networking=1
+skip_bind_address=1
+# Disable query cache for multi-core CPU
+query_cache_size=0
+query_cache_type=0
+# No MyISAM tables
+key_buffer_size=0
+# Meta Aria tables only
+aria_pagecache_buffer_size=512k
+# MySQLTuner/monitoring
+max_connections=16
+innodb_buffer_pool_size=64M
+innodb_log_file_size=16M
