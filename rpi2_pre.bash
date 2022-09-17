@@ -17,6 +17,10 @@ done
 G_AGP --allow-remove-essential init install-info liblocale-gettext-perl libtext-charwidth-perl libtext-iconv-perl libtext-wrapi18n-perl base-passwd \
 wireless-tools wireless-regdb wget wpasupplicant iw isc-dhcp-client firmware-realtek firmware-misc-nonfree firmware-linux-free firmware-iwlwifi firmware-brcm80211 firmware-atheros
 
+# Avoid some tmpfiles
+> /etc/tmpfiles.d/x11.conf
+> /etc/tmpfiles.d/legacy.conf
+
 # Remove non-required files
 G_EXEC_NOHALT=1 G_EXEC rm /etc/cron.d/e2scrub_all
 G_EXEC_NOHALT=1 G_EXEC rm /etc/cron.daily/apt-compat
