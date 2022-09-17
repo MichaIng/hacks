@@ -34,6 +34,10 @@ G_EXEC systemctl disable --now getty@tty1
 G_AGI gesftpserver
 #G_EXEC ln -s /usr/libexec/gesftpserver /usr/lib/openssh/sftp-server
 
+# Configure PHP-FPM
+G_EXEC sed -i 's/^pid/;pid/' /etc/php/*/fpm/php-fpm.conf
+G_CONFIG_INJECT 'error_log[[:blank:]=]' 'error_log = syslog' /etc/php/*/fpm/php-fpm.conf
+
 # Configure Apache2
 G_EXEC_NOHALT=1 G_EXEC a2disconf security other-vhosts-access-log charset localized-error-pages serve-cgi-bin
 G_EXEC_NOHALT=1 G_EXEC a2dismod -f access_compat auth_basic authn_core authn_file authz_host authz_user autoindex filter info negotiation reqtimeout status deflate filter
