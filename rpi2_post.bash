@@ -34,6 +34,16 @@ G_EXEC systemctl disable --now getty@tty1
 G_AGI gesftpserver
 #G_EXEC ln -s /usr/libexec/gesftpserver /usr/lib/openssh/sftp-server
 
+# Configure Redis
+G_CONFIG_INJECT 'bind[[:blank:]]' 'bind ""' /etc/redis/redis.conf
+G_CONFIG_INJECT 'port[[:blank:]]' 'port 0' /etc/redis/redis.conf
+G_CONFIG_INJECT 'tcp-backlog[[:blank:]]' 'tcp-backlog 128' /etc/redis/redis.conf
+G_CONFIG_INJECT 'databases[[:blank:]]' 'databases 1' /etc/redis/redis.conf
+G_CONFIG_INJECT 'acllog-max-len[[:blank:]]' 'acllog-max-len 32' /etc/redis/redis.conf
+G_CONFIG_INJECT 'bind[[:blank:]]' 'bind ""' /etc/redis/redis.conf
+G_CONFIG_INJECT 'maxmemory[[:blank:]]' 'maxmemory 16mb' /etc/redis/redis.conf
+G_CONFIG_INJECT 'slowlog-max-len[[:blank:]]' 'slowlog-max-len 32' /etc/redis/redis.conf
+
 # Configure PHP-FPM
 G_EXEC sed -i 's/^pid/;pid/' /etc/php/*/fpm/php-fpm.conf
 G_CONFIG_INJECT 'error_log[[:blank:]=]' 'error_log = syslog' /etc/php/*/fpm/php-fpm.conf
@@ -45,3 +55,6 @@ G_EXEC a2enmod rewrite headers dir env mime alias authz_core ssl
 
 G_EXEC curl -sSf 'https://raw.githubusercontent.com/MichaIng/hacks/main/rootfs/etc/apache2/conf-available/micha.conf.rpi2' -o /etc/apache2/conf-available/micha.conf
 G_EXEC a2enconf micha
+
+# Setup acme.sh
+bash -c "$(curl -sSf 'https://raw.githubusercontent.com/MichaIng/hacks/main/setup_acme.sh')"
