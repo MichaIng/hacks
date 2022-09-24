@@ -58,3 +58,13 @@ G_EXEC a2enconf micha
 
 # Setup acme.sh
 bash -c "$(curl -sSf 'https://raw.githubusercontent.com/MichaIng/hacks/main/setup_acme.sh')"
+
+# Configure Coturn
+G_EXEC sed -i 's/^[[:blank:]]*listening-port=/#listening-port=/' /etc/turnserver.conf
+G_CONFIG_INJECT 'alt-listening-port=' 'alt-listening-port=3478' /etc/turnserver.conf
+G_CONFIG_INJECT 'relay-threads=' 'relay-threads=0' /etc/turnserver.conf
+#G_EXEC sed -i 's/^[[:blank:]]*bps-capacity=/#bps-capacity=/' /etc/turnserver.conf
+G_CONFIG_INJECT 'no-tls' 'no-tls' /etc/turnserver.conf
+G_CONFIG_INJECT 'no-dtls' 'no-dtls' /etc/turnserver.conf
+#G_EXEC sed -i 's/^[[:blank:]]*syslog/#syslog/' /etc/turnserver.conf
+G_CONFIG_INJECT 'no-cli' 'no-cli' /etc/turnserver.conf
