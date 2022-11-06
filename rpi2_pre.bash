@@ -1,8 +1,8 @@
 #!/bin/bash
 . /boot/dietpi/func/dietpi-globals
 
-# Disable local console logging and cursor
-for i in 'quiet' 'loglevel=0' 'vt.global_cursor_default=0'
+# Disable local console logging and cursor, and prevent obsolete /dev/ramX init
+for i in 'quiet' 'loglevel=0' 'vt.global_cursor_default=0' 'initcall_blacklist=brd_init'
 do
 	grep "[[:blank:]]$i" /boot/cmdline.txt || G_EXEC sed "1s/\$/ $i/" /boot/cmdline.txt
 done
