@@ -3,4 +3,4 @@ Default: yes
 Priority: 257
 Session-Type: Additional
 Session:
-	[success=1 default=ignore] pam_succeed_if.so service in cron quiet use_uid
+	[success=1 default=ignore] pam_succeed_if.so quiet service = cron
