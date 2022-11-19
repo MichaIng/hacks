@@ -28,13 +28,13 @@ G_EXIT_CUSTOM()
 	G_EXEC systemctl mask --now dbus dbus.socket
 
 	# Revert workarounds
-	(( $remove_pts )) && sed -i '/^pts\/0$/d' m/etc/securetty
-	G_EXEC rm -f m/etc/systemd/system/dropbear.service m/var/lib/dietpi/postboot.d/micha-remount_tmp.sh
+	(( $remove_pts )) && sed -i '/^pts\/0$/d' rootfs/etc/securetty
+	G_EXEC rm -f rootfs/etc/systemd/system/dropbear.service rootfs/var/lib/dietpi/postboot.d/micha-remount_tmp.sh
 
 	# Cleanup
-	findmnt -M m > /dev/null && G_EXEC umount -Rl m
+	findmnt -M rootfs > /dev/null && G_EXEC umount -Rl rootfs
 	G_EXEC losetup -d "$LOOP_DEV"
-	[[ -d 'm' ]] && G_EXEC rmdir m
+	[[ -d 'rootfs' ]] && G_EXEC rmdir rootfs
 }
 trap G_EXIT_CUSTOM EXIT
 
@@ -64,21 +64,21 @@ then
 fi
 
 # Mount
-[[ -d 'm' ]] || G_EXEC mkdir m
-findmnt -M m &> /dev/null && G_EXEC umount -R m
-G_EXEC mount "$ROOT_DEV" m
-[[ $BOOT_DEV ]] && G_EXEC mount "$BOOT_DEV" m/boot
+[[ -d 'rootfs' ]] || G_EXEC mkdir rootfs
+findmnt -M rootfs &> /dev/null && G_EXEC umount -R rootfs
+G_EXEC mount "$ROOT_DEV" rootfs
+[[ $BOOT_DEV ]] && G_EXEC mount "$BOOT_DEV" rootfs/boot
 
 # Drop to shell for edit
 (( $EDIT )) && bash
 
 # Workarounds
 # - Allow root login on pts/0, required until Buster, on Bullseye /etc/securetty has been removed
-[[ -f 'm/etc/securetty' ]] && ! grep '^pts/0$' m/etc/securetty && echo 'pts/0' >> m/etc/securetty && remove_pts=1
+[[ -f 'rootfs/etc/securetty' ]] && ! grep '^pts/0$' rootfs/etc/securetty && echo 'pts/0' >> rootfs/etc/securetty && remove_pts=1
 # - Mask Dropbear to prevent its package install from failing
-ln -s /dev/null m/etc/systemd/system/dropbear.service
+ln -s /dev/null rootfs/etc/systemd/system/dropbear.service
 # - Remount /tmp tmpfs as it does not mount with intended size automatically somehow
-[[ -d 'm/var/lib/dietpi/postboot.d' ]] && echo -e '#!/bin/dash\nmount -o remount /tmp' > m/var/lib/dietpi/postboot.d/micha-remount_tmp.sh
+[[ -d 'rootfs/var/lib/dietpi/postboot.d' ]] && echo -e '#!/bin/dash\nmount -o remount /tmp' > rootfs/var/lib/dietpi/postboot.d/micha-remount_tmp.sh
 
 # dbus required for container spawn
 G_EXEC systemctl unmask dbus.socket dbus
@@ -87,7 +87,7 @@ G_EXEC systemctl start dbus.socket dbus
 abinds=()
 #abinds+=('--bind=/dev/fb0' '--bind=/dev/dri' '--bind=/dev/tty1')
 #abinds+=('--bind=/dev/gpiochip0' '--bind=/dev/gpiomem' '--bind=/sys/class/gpio' '--bind=/sys/devices/platform/soc/3f200000.gpio')
-systemd-nspawn -bD m --bind="$LOOP_DEV" --bind="$ROOT_DEV" ${BOOT_DEV:+--bind="$BOOT_DEV"} --bind=/dev/disk "${abinds[@]}"
+systemd-nspawn -bD rootfs --bind="$LOOP_DEV" --bind="$ROOT_DEV" ${BOOT_DEV:+--bind="$BOOT_DEV"} --bind=/dev/disk "${abinds[@]}"
 
 exit 0
 }
