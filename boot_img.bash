@@ -2,14 +2,14 @@
 {
 . /boot/dietpi/func/dietpi-globals
 
-# Inputs: "-e"=edit dietpi.txt, $1=img file, $2=img size (GiB, optional, defaults to 2)
-EDIT_DIETPITXT=0
+# Inputs: "-e"=drop to shell for edit, $1=img file, $2=img size (GiB, optional, defaults to 2)
+EDIT=0
 FP_IMG=
 FS_IMG=
 while (( $# ))
 do
 	case $1 in
-		'-e') EDIT_DIETPITXT=1;;
+		'-e') EDIT=1;;
 		*) [[ $FP_IMG ]] && FS_IMG=$1 || FP_IMG=$1;;
 	esac
 	shift
@@ -69,8 +69,8 @@ findmnt -M m &> /dev/null && G_EXEC umount -R m
 G_EXEC mount "$ROOT_DEV" m
 [[ $BOOT_DEV ]] && G_EXEC mount "$BOOT_DEV" m/boot
 
-# Edit dietpi.txt if requested
-(( $EDIT_DIETPITXT )) && nano m/boot/dietpi.txt
+# Drop to shell for edit
+(( $EDIT )) && bash
 
 # Workarounds
 # - Allow root login on pts/0, required until Buster, on Bullseye /etc/securetty has been removed
