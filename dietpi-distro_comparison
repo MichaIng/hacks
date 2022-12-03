@@ -106,17 +106,35 @@ if [[ $(findmnt -no FSTYPE /tmp) == 'tmpfs' ]]
 then
 	echo '/tmp is a tmpfs, which is good to reduce disk I/O.'
 else
-	echo '/tmp is not a tmpfs, which is bad since volatile files lead to disk I/O.'
+	zram_device=$(df | awk '/\/tmp$/ {print $1}')
+	case ${zram_device} in
+		/dev/zram*)
+			zram_algo=$(awk -F"[\[\]]" '{print $2}' </sys/block/${zram_device##*/}/comp_algorithm)
+			echo '/tmp resides ${zram_algo} compressed in RAM, which is good to reduce both disk I/O and RAM usage.'
+			;;
+		*)
+			echo '/tmp is not a tmpfs, which is bad since volatile files lead to disk I/O.'
+			;;
+	esac
 fi
 
 echo
 
-# Check if /tmp is a tmpfs
+# Check if /var/log is a tmpfs
 if [[ $(findmnt -no FSTYPE /var/log) == 'tmpfs' ]]
 then
-	echo '/var/log is a tmpfs, which is good to reduce disk I/O, but logs are lost on system crash.'
+	echo '/var/log is a tmpfs, which is good to reduce disk I/O, but might negatively affect RAM usage. Also logs are lost on system crash.'
 else
-	echo '/var/log is not a tmpfs, which is bad for disk I/O, but logs are preserved on system crash.'
+	zram_device=$(df | awk '/\/var\/log$/ {print $1}')
+	case ${zram_device} in
+		/dev/zram*)
+			zram_algo=$(awk -F"[\[\]]" '{print $2}' </sys/block/${zram_device##*/}/comp_algorithm)
+			echo '/var/log resides ${zram_algo} compressed in RAM, which is good to reduce disk I/O and allows logs to be synced back to storage so nothing is lost on system crash.'
+			;;
+		*)
+			echo '/var/log is not a tmpfs, which is bad for disk I/O, but logs are preserved on system crash.'
+			;;
+	esac
 fi
 
 echo
