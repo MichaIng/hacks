@@ -63,9 +63,9 @@ fi
 total=0
 for i in / /boot /boot/efi
 do
-	size=$(findmnt -nbo USED "$i")
+	size=$(findmnt -Ufnrbo USED -M "$i")
 	(( $size )) || continue
-	echo "$i filesystem disk usage: \"findmnt -nbo USED $i\""
+	echo "$i filesystem disk usage: \"findmnt -Ufnrbo USED -M $i\""
 	echo "$size bytes"
 	((total+=size))
 done
@@ -102,7 +102,7 @@ systemd-analyze | mawk '{print $(NF-1)" "$NF;exit}'
 echo
 
 # Check if /tmp is a tmpfs
-if [[ $(findmnt -no FSTYPE /tmp) == 'tmpfs' ]]
+if [[ $(findmnt -Ufnro FSTYPE -M /tmp) == 'tmpfs' ]]
 then
 	echo '/tmp is a tmpfs, which is good to reduce disk I/O.'
 else
@@ -112,7 +112,7 @@ fi
 echo
 
 # Check if /tmp is a tmpfs
-if [[ $(findmnt -no FSTYPE /var/log) == 'tmpfs' ]]
+if [[ $(findmnt -Ufnro FSTYPE -M /var/log) == 'tmpfs' ]]
 then
 	echo '/var/log is a tmpfs, which is good to reduce disk I/O, but logs are lost on system crash.'
 else
