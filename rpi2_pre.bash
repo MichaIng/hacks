@@ -17,6 +17,9 @@ done
 G_AGP --allow-remove-essential init install-info liblocale-gettext-perl libtext-charwidth-perl libtext-iconv-perl libtext-wrapi18n-perl base-passwd \
 wireless-tools wireless-regdb wget wpasupplicant iw isc-dhcp-client firmware-realtek firmware-misc-nonfree firmware-linux-free firmware-iwlwifi firmware-brcm80211 firmware-atheros
 
+# Remove some configs
+G_EXEC rm /etc/kernel/postinst.d/dietpi-USBridgeSig
+
 # Avoid some tmpfiles
 > /etc/tmpfiles.d/x11.conf
 > /etc/tmpfiles.d/legacy.conf
