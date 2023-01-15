@@ -33,7 +33,6 @@ Header set X-Frame-Options "sameorigin"
 Header set X-Robots-Tag "none"
 Header set X-Permitted-Cross-Domain-Policies "none"
 Header set Referrer-Policy "no-referrer"
-Header set Expect-CT "enforce, max-age=604800"
 
 # CSP + PP
 Header set Content-Security-Policy "upgrade-insecure-requests; default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
