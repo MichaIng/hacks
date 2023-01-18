@@ -48,6 +48,10 @@ G_CONFIG_INJECT 'slowlog-max-len[[:blank:]]' 'slowlog-max-len 32' /etc/redis/red
 G_EXEC sed -i 's/^pid/;pid/' /etc/php/*/fpm/php-fpm.conf
 G_CONFIG_INJECT 'error_log[[:blank:]=]' 'error_log = syslog' /etc/php/*/fpm/php-fpm.conf
 
+# Configure PHP
+G_EXEC phpenmod apcu ctype curl dom exif fileinfo gd igbinary intl mbstring mysqlnd opcache pdo pdo_mysql posix redis simplexml xml xmlreader xmlwriter zip
+G_EXEC phpdismod calendar ffi ftp gettext iconv mysqli phar readline shmop sockets sysvmsg sysvsem sysvshm tokenizer xsl
+
 # Configure Apache2
 G_EXEC_NOHALT=1 G_EXEC a2disconf security other-vhosts-access-log charset localized-error-pages serve-cgi-bin
 G_EXEC_NOHALT=1 G_EXEC a2dismod -f access_compat auth_basic authn_core authn_file authz_host authz_user autoindex filter info negotiation reqtimeout status deflate filter
