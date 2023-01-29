@@ -37,6 +37,7 @@ G_EXEC_NOHALT=1 G_EXEC rm -R /usr/share/X11
 G_EXEC_NOHALT=1 G_EXEC rm -R /etc/dhcp
 G_EXEC_NOHALT=1 G_EXEC rm -R /etc/ufw
 G_EXEC_NOHALT=1 G_EXEC rm -R /var/lib/polkit-1
+G_EXEC_NOHALT=1 G_EXEC rm /etc/motd
 G_EXEC_NOHALT=1 G_EXEC rm /etc/update-motd.d/10-uname
 G_EXEC_NOHALT=1 G_EXEC rm -R /etc/skel/{,.??,.[^.]}*
 G_EXEC_NOHALT=1 G_EXEC rm /etc/issue*
