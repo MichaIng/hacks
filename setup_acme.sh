@@ -7,6 +7,7 @@ cd /opt/acme.sh || exit 1
 curl -sSfLO 'https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh' || exit 1
 chmod +x acme.sh || exit 1
 ./acme.sh --issue --home /opt/acme.sh -d "$1" -w /var/www -k 'ec-384' --ocsp --server 'letsencrypt' || exit 1
+command -v a2enmod > /dev/null && a2enmod http2 || exit 1
 cat << '_EOF_' > /etc/cron.daily/micha || exit 1
 #!/bin/dash
 {
