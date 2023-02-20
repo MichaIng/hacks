@@ -18,3 +18,8 @@ aria_pagecache_buffer_size=512k
 max_connections=16
 innodb_buffer_pool_size=64M
 innodb_log_file_size=16M
+innodb_log_buffer_size=16M
+innodb_flush_log_at_trx_commit=2
+innodb_flush_log_at_timeout=60
+# InnoDB recovery
+#innodb_force_recovery=1
