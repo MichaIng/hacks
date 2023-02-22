@@ -10,7 +10,7 @@ alias l='ls -lh'
 alias ll='l -L'
 
 # Quick APT upgrade alias
-alias APT='apt update && apt list --upgradeable && apt full-upgrade && apt autopurge'
+alias APT='apt clean && apt update && apt list --upgradeable && apt full-upgrade && apt autopurge'
 
 # Prevent accidental removals and make them verbose
 alias rm='rm -RiIv'
