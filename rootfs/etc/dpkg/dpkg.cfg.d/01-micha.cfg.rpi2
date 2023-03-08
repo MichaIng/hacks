@@ -129,3 +129,7 @@ path-exclude /var/lib/polkit-1
 # ufw
 path-exclude /etc/ufw/*
 path-exclude /etc/ufw
+
+# monit
+path-exclude /etc/monit/*
+path-exclude /etc/monit

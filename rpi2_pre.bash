@@ -46,6 +46,7 @@ G_EXEC_NOHALT=1 G_EXEC rm /etc/kernel/postinst.d/apt-auto-removal
 G_EXEC_NOHALT=1 G_EXEC rm /etc/apt/apt.conf.d/70debconf
 G_EXEC_NOHALT=1 G_EXEC rm /etc/default/fake-hwclock
 G_EXEC_NOHALT=1 G_EXEC rm /etc/ld.so.conf.d/00-vmcs.conf
+G_EXEC_NOHALT=1 G_EXEC rm /etc/kernel/postinst.d/dietpi-USBridgeSig
 
 # Make shell autocompletion case-insensitive
 G_CONFIG_INJECT 'set[[:blank:]]+completion-ignore-case[[:blank:]]' 'set completion-ignore-case on' /etc/inputrc
