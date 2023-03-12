@@ -7,6 +7,7 @@ ErrorLog syslog:local7
 </Directory>
 
 <Directory /var/www>
+	Require all denied
 	Options FollowSymLinks
 </Directory>
 
@@ -28,25 +29,25 @@ ServerSignature Off
 TraceEnable Off
 
 # Security headers
-Header set X-Content-Type-Options "nosniff"
-Header set X-Frame-Options "sameorigin"
-Header set X-Robots-Tag "none"
-Header set X-Permitted-Cross-Domain-Policies "none"
-Header set Referrer-Policy "no-referrer"
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "sameorigin"
+Header always set X-Robots-Tag "none"
+Header always set X-Permitted-Cross-Domain-Policies "none"
+Header always set Referrer-Policy "no-referrer"
 
 # CSP + PP
-Header set Content-Security-Policy "upgrade-insecure-requests; default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+Header always set Content-Security-Policy "upgrade-insecure-requests; default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
 # - display-capture: Error with Permissions-Policy header: Origin trial controlled feature not enabled: 'display-capture'.
-Header set Permissions-Policy "accelerometer=(), autoplay=(), camera=(), document-domain=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), usb=(), screen-wake-lock=()"
+Header always set Permissions-Policy "accelerometer=(), autoplay=(), camera=(), document-domain=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), usb=(), screen-wake-lock=()"
 
 <Location /opcache.php>
 	# connect-src 'self': For real-time update
-	Header set Content-Security-Policy "upgrade-insecure-requests; default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline' https://unpkg.com; img-src data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+	Header always set Content-Security-Policy "upgrade-insecure-requests; default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline' https://unpkg.com; img-src data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
 </Location>
 <Location /apc.php>
 	# form-action 'self': For entry search
-	Header set Content-Security-Policy "upgrade-insecure-requests; default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
+	Header always set Content-Security-Policy "upgrade-insecure-requests; default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
 </Location>
 <Location /phpinfo.php>
-	Header set Content-Security-Policy "upgrade-insecure-requests; default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+	Header always set Content-Security-Policy "upgrade-insecure-requests; default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
 </Location>
