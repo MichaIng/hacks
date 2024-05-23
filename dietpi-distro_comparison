@@ -20,12 +20,12 @@ do
 	echo 'Waiting for DietPi-Postboot to finish'
 	sleep 1
 done
-while pgrep -f 'dietpi-update'
+while pgrep -f 'dietpi-update' > /dev/null
 do
 	echo 'Waiting for DietPi-Update to finish'
 	sleep 1
 done
-while pgrep -f 'apt-get'
+while pgrep -f 'apt-get' > /dev/null
 do
 	echo 'Waiting for APT calls to finish'
 	sleep 1
