@@ -148,7 +148,7 @@ fi
 echo
 
 # SSH
-if ss -tuln | grep -q ':22'
+if ss -tln | grep -q ':22'
 then
 	echo 'This image comes with an SSH server pre-installed.'
 	[[ $SSH_TTY ]] && echo 'The script was executed from within an SSH session, which increases the process count above by one, compared to a local console session.
