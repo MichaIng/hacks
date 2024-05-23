@@ -57,11 +57,12 @@ NB: A flag file will be created to skip this on next script execution.\n'
 	> /dietpi-distro_comparison.flag
 	read -rp 'The system will now reboot, press any key to continue...'
 	reboot
+	exit 0
 fi
 
 # Disk usage
 total=0
-for i in / /boot /boot/efi
+for i in / /boot /boot/efi /boot/firmware
 do
 	size=$(findmnt -Ufnrbo USED -M "$i")
 	(( $size )) || continue
