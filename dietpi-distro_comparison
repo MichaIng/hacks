@@ -44,14 +44,18 @@ NB: A flag file will be created to skip this on next script execution.\n'
 	apt-get -y dist-upgrade
 	apt-get -y autopurge
 
+	[[ -f '/boot/dietpi/func/dietpi-set_swapfile' ]] && /boot/dietpi/func/dietpi-set_swapfile 0
+	if command -v dphys-swapfile > /dev/null
+	then
+		dphys-swapfile swapoff
+		dphys-swapfile uninstall
+	fi
 	while read -r file
 	do
 		swapoff "$file"
 		[[ -f $file ]] && rm -v "$file"
 
 	done < <(swapon --show NAME --noheadings | mawk '{print $1}')
-	command -v dphys-swapfile > /dev/null && dphys-swapfile uninstall
-	[[ -f '/boot/dietpi/func/dietpi-set_swapfile' ]] && /boot/dietpi/func/dietpi-set_swapfile 0
 	sed -i '/[[:blank:]]swap[[:blank:]]/d' /etc/fstab
 
 	> /dietpi-distro_comparison.flag
