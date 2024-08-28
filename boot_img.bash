@@ -2,14 +2,21 @@
 {
 . /boot/dietpi/func/dietpi-globals
 
-# Inputs: "-e"=drop to shell for edit, $1=img file, $2=img size (GiB, optional, defaults to 2)
+# Inputs:
+# - "-e": drop to shell for edit
+# - "-b": has boot partition: if set, assumes partition 1 to be boot partition, and partition 2 to be rootfs
+# - $1: img path
+# - $2: img size (GiB, optional, defaults to 2)
 EDIT=0
 FP_IMG=
 FS_IMG=
+ROOT_PART=1
+BOOT_PART=
 while (( $# ))
 do
 	case $1 in
 		'-e') EDIT=1;;
+		'-b') BOOT_PART=1 ROOT_PART=2;;
 		*) [[ $FP_IMG ]] && FS_IMG=$1 || FP_IMG=$1;;
 	esac
 	shift
@@ -22,14 +29,12 @@ disable_error=1 G_CHECK_VALIDINT "$FS_IMG" 0 || FS_IMG=2
 G_AG_CHECK_INSTALL_PREREQ parted fdisk dosfstools dbus systemd-container "${emulation_packages[@]}"
 [[ ${emulation_packages[0]} ]] && G_EXEC systemctl restart systemd-binfmt
 LOOP_DEV=$(losetup -f)
-ROOT_DEV="${LOOP_DEV}p2"
+ROOT_DEV="${LOOP_DEV}p$ROOT_PART"
+[[ $BOOT_PART ]] && BOOT_DEV="${LOOP_DEV}p$BOOT_PART"
 
 G_EXIT_CUSTOM()
 {
-	G_EXEC systemctl mask --now dbus dbus.socket
-
 	# Revert workarounds
-	(( $remove_pts )) && sed -i '/^pts\/0$/d' rootfs/etc/securetty
 	G_EXEC rm -f rootfs/etc/systemd/system/dropbear.service rootfs/var/lib/dietpi/postboot.d/micha-remount_tmp.sh
 
 	# Cleanup
@@ -43,12 +48,11 @@ trap G_EXIT_CUSTOM EXIT
 G_EXEC losetup "$LOOP_DEV" "$FP_IMG"
 G_EXEC partprobe "$LOOP_DEV"
 G_EXEC partx -u "$LOOP_DEV"
-[[ -b ${LOOP_DEV}p2 ]] && BOOT_DEV="${LOOP_DEV}p1" || ROOT_DEV="${LOOP_DEV}p1"
 G_EXEC_OUTPUT=1 G_EXEC e2fsck -fyD "$ROOT_DEV"
 [[ $BOOT_DEV ]] && G_EXEC_OUTPUT=1 G_EXEC fsck -y "$BOOT_DEV"
 
 # Raise image+partition+fs size if required, always run fsck
-if (( $FS_IMG && $(stat -c %s "$FP_IMG") < $FS_IMG*1024**3 ))
+if (( $FS_IMG && $(stat -c '%s' "$FP_IMG") < $FS_IMG*1024**3 ))
 then
 	G_EXEC truncate -s $(($FS_IMG*1024**3)) "$FP_IMG"
 	G_EXEC losetup -c "$LOOP_DEV"
@@ -61,11 +65,10 @@ then
 	G_EXEC partprobe "$LOOP_DEV"
 	G_EXEC partx -u "$LOOP_DEV"
 	G_EXEC_OUTPUT=1 G_EXEC resize2fs "$ROOT_DEV"
-	G_EXEC_OUTPUT=1 G_EXEC e2fsck -fyD "$ROOT_DEV"
 fi
 
 # Mount
-[[ -d 'rootfs' ]] || G_EXEC mkdir rootfs
+G_EXEC mkdir -p rootfs
 findmnt -M rootfs &> /dev/null && G_EXEC umount -R rootfs
 G_EXEC mount "$ROOT_DEV" rootfs
 [[ $BOOT_DEV ]] && G_EXEC mount "$BOOT_DEV" rootfs/boot
@@ -74,8 +77,6 @@ G_EXEC mount "$ROOT_DEV" rootfs
 (( $EDIT )) && bash
 
 # Workarounds
-# - Allow root login on pts/0, required until Buster, on Bullseye /etc/securetty has been removed
-[[ -f 'rootfs/etc/securetty' ]] && ! grep '^pts/0$' rootfs/etc/securetty && echo 'pts/0' >> rootfs/etc/securetty && remove_pts=1
 # - Mask Dropbear to prevent its package install from failing
 ln -s /dev/null rootfs/etc/systemd/system/dropbear.service
 # - Remount /tmp tmpfs as it does not mount with intended size automatically somehow
