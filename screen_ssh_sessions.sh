@@ -43,6 +43,6 @@ cat << '_EOF_' > /etc/profile.d/00-micha.sh
 _EOF_
 
 # Use dash as default shell to reduce overhead before screen is loaded
-usermod -s /bin/dash root
-getent passwd dietpi > /dev/null && usermod -s /bin/dash dietpi
+usermod -s /usr/bin/dash root
+getent passwd dietpi > /dev/null && usermod -s /usr/bin/dash dietpi
 }
