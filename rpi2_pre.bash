@@ -14,8 +14,8 @@ done
 [[ -f '/boot/dpkg.cfg.rpi2' ]] && G_EXEC mv /boot/dpkg.cfg.rpi2 /etc/dpkg/dpkg.cfg.d/01-micha
 
 # Purge non-required important/required/essential and regular packages
-G_AGP --allow-remove-essential init install-info liblocale-gettext-perl libtext-charwidth-perl libtext-iconv-perl libtext-wrapi18n-perl base-passwd \
-wireless-tools wireless-regdb wget wpasupplicant iw isc-dhcp-client firmware-realtek firmware-misc-nonfree firmware-linux-free firmware-iwlwifi firmware-brcm80211 firmware-atheros
+G_AGP --allow-remove-essential init install-info liblocale-gettext-perl libtext-charwidth-perl libtext-iconv-perl libtext-wrapi18n-perl \
+wireless-tools wireless-regdb wpasupplicant iw isc-dhcp-client firmware-realtek firmware-misc-nonfree firmware-linux-free firmware-iwlwifi firmware-brcm80211 firmware-atheros firmware-mediatek
 
 # Remove some configs
 G_EXEC rm /etc/kernel/postinst.d/dietpi-USBridgeSig

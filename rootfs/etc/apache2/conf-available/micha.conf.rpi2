@@ -1,53 +1,56 @@
-DocumentRoot /var/www
-MaxKeepAliveRequests 0
-ErrorLog syslog:local7
+# Set server name
+ServerName micha.gnoedi.org
 
+# Deny access to shared icons
 <Directory /usr/share>
 	Require all denied
 </Directory>
 
+# Disable Indexes
 <Directory /var/www>
 	Require all denied
 	Options FollowSymLinks
 </Directory>
 
+# Set single index page
 DirectoryIndex index.html
 
-# MPM
-StartServers 1
-ServerLimit 1
+# MPM event configuration
 ThreadsPerChild 32
 ThreadLimit 32
-MinSpareThreads 1
 MaxSpareThreads 32
 MaxRequestWorkers 32
-MaxConnectionsPerChild 0
-
-# Minimize public info
-ServerTokens Prod
-ServerSignature Off
-TraceEnable Off
 
 # Security headers
-Header always set X-Content-Type-Options "nosniff"
-Header always set X-Frame-Options "sameorigin"
-Header always set X-Robots-Tag "none"
-Header always set X-Permitted-Cross-Domain-Policies "none"
-Header always set Referrer-Policy "no-referrer"
+#Header always unset X-XSS-Protection
+#Header always unset Feature-Policy
 
 # CSP + PP
-Header always set Content-Security-Policy "upgrade-insecure-requests; default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
-# - display-capture: Error with Permissions-Policy header: Origin trial controlled feature not enabled: 'display-capture'.
-Header always set Permissions-Policy "accelerometer=(), autoplay=(), camera=(), document-domain=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), usb=(), screen-wake-lock=()"
+Header always set Content-Security-Policy "upgrade-insecure-requests; default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'" "expr=! %{REQUEST_URI} =~ m#^/nextcloud#"
+# - document-domain: Error with Permissions-Policy header: Unrecognized feature: 'document-domain'.
+Header always set Permissions-Policy "accelerometer=(), autoplay=(), browsing-topics=(), camera=(), display-capture=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), interest-cohort=(), magnetometer=(), microphone=(), midi=(), payment=(), usb=(), screen-wake-lock=()"
 
-<Location /opcache.php>
-	# connect-src 'self': For real-time update
-	Header always set Content-Security-Policy "upgrade-insecure-requests; default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline' https://unpkg.com; img-src data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
-</Location>
-<Location /apc.php>
-	# form-action 'self': For entry search
-	Header always set Content-Security-Policy "upgrade-insecure-requests; default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
-</Location>
-<Location /phpinfo.php>
-	Header always set Content-Security-Policy "upgrade-insecure-requests; default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
-</Location>
+# Info page authentication specific CSP
+<Directory /var/www/info>
+	AuthType Basic
+	AuthName " "
+	#AuthBasicProvider socache file # a2enmod authn_socache
+	AuthUserFile /etc/apache2/.htpasswd
+	Require user XXXX
+	<Files opcache.php>
+		# connect-src 'self': For real-time update
+		Header always set Content-Security-Policy "upgrade-insecure-requests; default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline' https://cdnjs.cloudflare.com; img-src data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+	</Files>
+	<Files apc.php>
+		# form-action 'self': For entry search
+		Header always set Content-Security-Policy "upgrade-insecure-requests; default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
+	</Files>
+	<Files phpinfo.php>
+		Header always set Content-Security-Policy "upgrade-insecure-requests; default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+	</Files>
+</Directory>
+
+# ACME
+<Directory /var/www/.well-known/acme-challenge>
+	Require all granted
+</Directory>
