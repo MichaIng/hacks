@@ -8,7 +8,7 @@ cd /opt/acme.sh
 curl -sSfLO 'https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh'
 chmod +x acme.sh
 [ $1 ] && domain=$1 || read -rp 'Domain: ' domain
-./acme.sh --issue --home /opt/acme.sh -d "$domain" -w /var/www -k 'ec-384' --ocsp --server 'letsencrypt'
+./acme.sh --issue --home /opt/acme.sh -d "$domain" -w /var/www -k 'ec-384' --server 'letsencrypt'
 ! command -v a2enmod > /dev/null && a2enmod http2
 cat << '_EOF_' > /etc/cron.daily/micha
 #!/bin/dash
@@ -22,13 +22,16 @@ cat << '_EOF_' > /etc/cron.daily/micha
 		echo "[$(date)] ERROR: Failed to download acme.sh"
 	fi
 	echo '-------------------------------------------------------------'
-	exit 0
 
 } >> /var/log/acme.sh.log 2>&1
 {
 	echo "[$(date '+%F %T')] Enabling Nextcloud maintenance mode"
 	if sudo -u www-data php /var/www/nextcloud/occ maintenance:mode --on
 	then
+		echo "[$(date '+%F %T')] Stopping webserver and PHP"
+		systemctl stop apache2
+		systemctl stop php8.4-fpm
+
 		echo "[$(date '+%F %T')] Creating database dump"
 		mysqldump nextcloud > /mnt/sda/ncdata/dbbackup/$(date +%F_%T).sql
 
@@ -55,6 +58,10 @@ cat << '_EOF_' > /etc/cron.daily/micha
 
 		echo "[$(date '+%F %T')] Disabling Nextcloud maintenance mode"
 		sudo -u www-data php /var/www/nextcloud/occ maintenance:mode --off
+
+		echo "[$(date '+%F %T')] Starting PHP and webserver"
+		systemctl start php8.4-fpm
+		systemctl start apache2
 	else
 		echo "[$(date '+%F %T')] ERROR: Failed to enable Nextcloud maintenance mode"
 	fi
