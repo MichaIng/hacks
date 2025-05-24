@@ -58,7 +58,7 @@ G_EXEC curl -sSf 'https://raw.githubusercontent.com/MichaIng/hacks/main/rootfs/e
 G_EXEC a2enconf micha
 
 # Setup acme.sh
-bash -c "$(curl -sSf 'https://raw.githubusercontent.com/MichaIng/hacks/main/setup_acme.sh')"
+dash -c "$(curl -sSf 'https://raw.githubusercontent.com/MichaIng/hacks/main/setup_acme.sh')"
 
 # Configure Coturn
 G_EXEC sed -i 's/^[[:blank:]]*listening-port=/#listening-port=/' /etc/turnserver.conf

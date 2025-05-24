@@ -2,14 +2,15 @@
 # Install acme.sh and issue a 384-bit ECC certificate + auto renewal cron job
 # Input argument $1 = domain
 {
-mkdir -p /opt/acme.sh || exit 1
-cd /opt/acme.sh || exit 1
-curl -sSfLO 'https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh' || exit 1
-chmod +x acme.sh || exit 1
+set -e
+mkdir -p /opt/acme.sh
+cd /opt/acme.sh
+curl -sSfLO 'https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh'
+chmod +x acme.sh
 [ $1 ] && domain=$1 || read -rp 'Domain: ' domain
-./acme.sh --issue --home /opt/acme.sh -d "$domain" -w /var/www -k 'ec-384' --ocsp --server 'letsencrypt' || exit 1
-command -v a2enmod > /dev/null && a2enmod http2 || exit 1
-cat << '_EOF_' > /etc/cron.daily/micha || exit 1
+./acme.sh --issue --home /opt/acme.sh -d "$domain" -w /var/www -k 'ec-384' --ocsp --server 'letsencrypt'
+! command -v a2enmod > /dev/null && a2enmod http2
+cat << '_EOF_' > /etc/cron.daily/micha
 #!/bin/dash
 {
 	echo "[$(date)] INFO: Updating acme.sh..."
@@ -67,5 +68,5 @@ cat << '_EOF_' > /etc/cron.daily/micha || exit 1
 
 } >> /var/log/micha-backup.log 2>&1
 _EOF_
-chmod +x /etc/cron.daily/micha || exit 1
+chmod +x /etc/cron.daily/micha
 }
