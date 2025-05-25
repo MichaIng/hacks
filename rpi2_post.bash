@@ -14,7 +14,7 @@ bash -c "$(curl -sSf 'https://raw.githubusercontent.com/MichaIng/hacks/main/clea
 G_EXEC eval 'echo '\''deb https://deb.debian.org/debian/ bookworm main'\'' > /etc/apt/sources.list'
 
 # Configure bash
-G_EXEC curl -sSf 'https://raw.githubusercontent.com/MichaIng/hacks/main/rootfs/etc/bashrc.d/micha.sh' -o /etc/bashrc.d/micha.sh
+G_EXEC curl -sSfo /etc/bashrc.d/micha.sh 'https://raw.githubusercontent.com/MichaIng/hacks/main/rootfs/etc/bashrc.d/micha.sh'
 
 # Configure Dropbear
 bash -c "$(curl -sSf 'https://raw.githubusercontent.com/MichaIng/hacks/main/dropbear_systemd.sh')"
@@ -41,7 +41,9 @@ G_CONFIG_INJECT 'slowlog-max-len[[:blank:]]' 'slowlog-max-len 32' /etc/redis/red
 
 # Configure PHP-FPM
 G_EXEC sed -i 's/^pid/;pid/' /etc/php/*/fpm/php-fpm.conf
-G_CONFIG_INJECT 'error_log[[:blank:]=]' 'error_log = syslog' /etc/php/*/fpm/php-fpm.conf
+G_EXEC curl -sSfo /etc/php/*/fpm/pool.d/zz-micha.conf 'https://raw.githubusercontent.com/MichaIng/hacks/main/rootfs/etc/php/8.4/fpm/pool.d/zz-micha.conf'
+G_EXEC curl -sSfo /etc/php/*/mods-available/micha.ini 'https://raw.githubusercontent.com/MichaIng/hacks/main/rootfs/etc/php/8.4/mods-available/micha.ini'
+G_EXEC phpenmod micha
 
 # Configure PHP
 G_EXEC phpenmod apcu ctype curl dom exif fileinfo gd igbinary intl mbstring mysqlnd opcache pdo pdo_mysql posix redis simplexml xml xmlreader xmlwriter zip
@@ -54,7 +56,7 @@ G_EXEC_NOHALT=1 G_EXEC a2dismod -f access_compat authz_host autoindex info negot
 # Does it still cause issues with Nextcloud? deflate filter
 G_EXEC a2enmod alias authz_core dir env headers mime rewrite ssl
 
-G_EXEC curl -sSf 'https://raw.githubusercontent.com/MichaIng/hacks/main/rootfs/etc/apache2/conf-available/micha.conf.rpi2' -o /etc/apache2/conf-available/micha.conf
+G_EXEC curl -sSfo /etc/apache2/conf-available/micha.conf 'https://raw.githubusercontent.com/MichaIng/hacks/main/rootfs/etc/apache2/conf-available/micha.conf.rpi2'
 G_EXEC a2enconf micha
 
 # Setup acme.sh
