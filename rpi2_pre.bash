@@ -17,9 +17,6 @@ done
 G_AGP --allow-remove-essential init install-info liblocale-gettext-perl libtext-charwidth-perl libtext-iconv-perl libtext-wrapi18n-perl \
 wireless-tools wireless-regdb wpasupplicant iw isc-dhcp-client firmware-realtek firmware-misc-nonfree firmware-linux-free firmware-iwlwifi firmware-brcm80211 firmware-atheros firmware-mediatek
 
-# Remove some configs
-G_EXEC rm /etc/kernel/postinst.d/dietpi-USBridgeSig
-
 # Avoid some tmpfiles
 > /etc/tmpfiles.d/x11.conf
 > /etc/tmpfiles.d/legacy.conf
@@ -44,9 +41,17 @@ G_EXEC_NOHALT=1 G_EXEC rm /etc/issue*
 G_EXEC_NOHALT=1 G_EXEC rm /etc/apt/apt.conf.d/01autoremove*
 G_EXEC_NOHALT=1 G_EXEC rm /etc/kernel/postinst.d/apt-auto-removal
 G_EXEC_NOHALT=1 G_EXEC rm /etc/apt/apt.conf.d/70debconf
-G_EXEC_NOHALT=1 G_EXEC rm /etc/default/fake-hwclock
 G_EXEC_NOHALT=1 G_EXEC rm /etc/ld.so.conf.d/00-vmcs.conf
-G_EXEC_NOHALT=1 G_EXEC rm /etc/kernel/postinst.d/dietpi-USBridgeSig
 
 # Make shell autocompletion case-insensitive
 G_CONFIG_INJECT 'set[[:blank:]]+completion-ignore-case[[:blank:]]' 'set completion-ignore-case on' /etc/inputrc
+
+# crontab
+G_EXEC curl -sSfo /etc/crontab 'https://raw.githubusercontent.com/MichaIng/hacks/main/rootfs/etc/crontab'
+G_CONFIG_INJECT 'EXTRA_OPTS=' 'EXTRA_OPTS="-L 5"' /etc/default/cron
+
+# Move to more regular fake-hwclock
+G_EXEC curl -sSfo /etc/cron.d/micha 'https://raw.githubusercontent.com/MichaIng/hacks/main/rootfs/etc/cron.d/micha'
+G_EXEC systemctl disable --now fake-hwclock-save.timer
+G_EXEC chmod -x cron.hourly/fake-hwclock
+G_EXEC_NOHALT=1 G_EXEC rm /etc/default/fake-hwclock

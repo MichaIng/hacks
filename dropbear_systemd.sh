@@ -2,23 +2,21 @@
 # Create Dropbear systemd unit with Ed25519 host key
 # Created by MichaIng / micha@dietpi.com / dietpi.com
 {
-# Remove obsolete SysV and upstart files
-dpkg-query -s dropbear-run > /dev/null 2>&1 && { apt-get -y purge dropbear-run || exit 1; }
-dpkg-query -s dropbear > /dev/null 2>&1 && { apt-get -y purge dropbear || exit 1; }
-
-# Assure up-to-date Dropbear binary is installed
-apt-get update || exit 1
-apt-get -y --no-install-recommends install dropbear-bin || exit 1
+sed -e
+# Move from wrapper to binary package
+apt-get update
+apt-get -y --no-install-recommends install dropbear-bin
+! dpkg-query -s dropbear > /dev/null 2>&1 || apt-get -y autopurge dropbear
 
 # Remove obsolete files
-rm -Rfv /etc/dropbear /etc/default/dropbear || exit 1
+rm -Rfv /etc/dropbear /etc/default/dropbear
 
 # Create Ed25519 host key
-mkdir /etc/dropbear || exit 1
-dropbearkey -t ed25519 -f /etc/dropbear/dropbear_ed25519_host_key || exit 1
+mkdir /etc/dropbear
+dropbearkey -t ed25519 -f /etc/dropbear/dropbear_ed25519_host_key
 
 # Create systemd unit
-cat << '_EOF_' > /etc/systemd/system/dropbear.service || exit 1
+cat << '_EOF_' > /etc/systemd/system/dropbear.service
 [Unit]
 Description=Dropbear
 Wants=network-online.target
@@ -33,9 +31,9 @@ WantedBy=multi-user.target
 _EOF_
 
 # Start service
-systemctl daemon-reload || exit 1
-systemctl disable dropbear # Remove obsolete symlinks
-update-rc.d dropbear remove # Remove /etc/init.d symlinks
-systemctl enable dropbear || exit 1
-systemctl restart dropbear || exit 1
+systemctl daemon-reload
+systemctl disable dropbear || : # Remove obsolete symlinks
+update-rc.d dropbear remove || : # Remove /etc/init.d symlinks
+systemctl enable dropbear
+systemctl restart dropbear
 }

@@ -109,24 +109,3 @@ path-exclude /etc/ufw
 # monit
 path-exclude /etc/monit/*
 path-exclude /etc/monit
-
-# RPi
-path-exclude /etc/ld.so.conf.d/00-vmcs.conf
-
-# bcm2709 cut-down firmware only
-path-exclude /boot/start*.elf
-path-include /boot/start_cd.elf
-path-exclude /boot/fixup*.dat
-path-include /boot/fixup_cd.dat
-path-exclude /boot/bcm27*.dtb
-path-include /boot/bcm2709-rpi-2-b.dtb
-path-exclude /boot/kernel*.img
-path-include /boot/kernel7.img
-path-exclude /lib/modules/*
-path-include /lib/modules/*-v7+
-path-include /lib/modules/*-v7+/*
-path-exclude /boot/overlays/*
-path-exclude /boot/COPYING.linux
-path-exclude /boot/LICENCE.broadcom
-path-exclude /usr/share/rpikernelhack/*
-path-exclude /usr/share/rpikernelhack

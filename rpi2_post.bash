@@ -52,7 +52,6 @@ G_EXEC_NOHALT=1 G_EXEC a2disconf security other-vhosts-access-log charset locali
 G_EXEC_NOHALT=1 G_EXEC a2dismod -f access_compat authz_host autoindex info negotiation reqtimeout setenvif status
 # Info page authentication via .htpasswd: auth_basic authn_core authn_file authz_user
 # Does it still cause issues with Nextcloud? deflate filter
-# OCSP: socache_shmcb
 G_EXEC a2enmod alias authz_core dir env headers mime rewrite ssl
 
 G_EXEC curl -sSf 'https://raw.githubusercontent.com/MichaIng/hacks/main/rootfs/etc/apache2/conf-available/micha.conf.rpi2' -o /etc/apache2/conf-available/micha.conf
