@@ -50,8 +50,9 @@ G_EXEC phpdismod calendar ffi ftp gettext iconv mysqli phar readline shmop socke
 # Configure Apache2
 G_EXEC_NOHALT=1 G_EXEC a2disconf security other-vhosts-access-log charset localized-error-pages serve-cgi-bin
 G_EXEC_NOHALT=1 G_EXEC a2dismod -f access_compat authz_host autoindex info negotiation reqtimeout setenvif status
-# auth_basic authn_core authn_file authz_user
-# deflate filter
+# Info page authentication via .htpasswd: auth_basic authn_core authn_file authz_user
+# Does it still cause issues with Nextcloud? deflate filter
+# OCSP: socache_shmcb
 G_EXEC a2enmod alias authz_core dir env headers mime rewrite ssl
 
 G_EXEC curl -sSf 'https://raw.githubusercontent.com/MichaIng/hacks/main/rootfs/etc/apache2/conf-available/micha.conf.rpi2' -o /etc/apache2/conf-available/micha.conf
