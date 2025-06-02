@@ -1,6 +1,6 @@
 [mysqld]
-# Skip PID file
-pid_file=/dev/null
+# Skip PID file: Below would replace /dev/null node with a real file :(
+#pid_file=/dev/null
 # systemd-journald logging
 skip_log_error=1
 # No TCP listener
