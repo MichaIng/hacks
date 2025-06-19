@@ -21,6 +21,9 @@ wireless-tools wireless-regdb wpasupplicant iw isc-dhcp-client firmware-realtek 
 > /etc/tmpfiles.d/x11.conf
 > /etc/tmpfiles.d/legacy.conf
 
+# Remove dietpi user
+getent passwd dietpi > /dev/null && G_EXEC userdel -rf dietpi
+
 # Remove non-required files
 G_EXEC_NOHALT=1 G_EXEC rm /etc/cron.d/e2scrub_all
 G_EXEC_NOHALT=1 G_EXEC rm /etc/cron.daily/apt-compat
