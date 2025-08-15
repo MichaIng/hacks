@@ -45,9 +45,7 @@ G_EXIT_CUSTOM()
 trap G_EXIT_CUSTOM EXIT
 
 # Create loop device and fsck
-G_EXEC losetup "$LOOP_DEV" "$FP_IMG"
-G_EXEC partprobe "$LOOP_DEV"
-G_EXEC partx -u "$LOOP_DEV"
+G_EXEC losetup -P "$LOOP_DEV" "$FP_IMG"
 G_EXEC_OUTPUT=1 G_EXEC e2fsck -fyD "$ROOT_DEV"
 [[ $BOOT_DEV ]] && G_EXEC_OUTPUT=1 G_EXEC fsck -y "$BOOT_DEV"
 
