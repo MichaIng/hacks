@@ -79,6 +79,15 @@ G_EXEC mount "$ROOT_DEV" rootfs
 ln -s /dev/null rootfs/etc/systemd/system/dropbear.service
 # - Remount /tmp tmpfs as it does not mount with intended size automatically somehow
 [[ -d 'rootfs/var/lib/dietpi/postboot.d' ]] && echo -e '#!/bin/dash\nmount -o remount /tmp' > rootfs/var/lib/dietpi/postboot.d/micha-remount_tmp.sh
+if [[ ${emulation_packages[0]} ]]
+then
+	for i in rootfs/lib/systemd/system/*.service
+	do
+		[[ -f $i ]] || continue
+		grep -q '^ImportCredential=' "$i" && G_EXEC mkdir -p "${i/lib/etc}.d" && G_EXEC eval "echo -e '[Service]\nImportCredential=' > '${i/lib/etc}.d/no-credentials.conf'"
+		grep -q '^LoadCredential=' "$i" && G_EXEC mkdir -p "${i/lib/etc}.d" && G_EXEC eval "echo -e '[Service]\nLoadCredential=' > '${i/lib/etc}.d/no-credentials.conf'"
+	done
+fi
 
 # dbus required for container spawn
 G_EXEC systemctl unmask dbus.socket dbus
