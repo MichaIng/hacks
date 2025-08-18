@@ -26,17 +26,22 @@ disable_error=1 G_CHECK_VALIDINT "$FS_IMG" 0 || FS_IMG=2
 
 # Install QEMU emulation support when running from x86_64 host
 (( $G_HW_ARCH == 10 )) && emulation_packages=('qemu-user-static') || emulation_packages=()
-G_AG_CHECK_INSTALL_PREREQ parted fdisk dosfstools dbus systemd-container "${emulation_packages[@]}"
+G_AG_CHECK_INSTALL_PREREQ parted fdisk dbus systemd-container "${emulation_packages[@]}"
 [[ ${emulation_packages[0]} ]] && G_EXEC systemctl restart systemd-binfmt
 LOOP_DEV=$(losetup -f)
 ROOT_DEV="${LOOP_DEV}p$ROOT_PART"
-[[ $BOOT_PART ]] && BOOT_DEV="${LOOP_DEV}p$BOOT_PART"
+[[ $BOOT_PART ]] && BOOT_DEV="${LOOP_DEV}p$BOOT_PART" && G_AG_CHECK_INSTALL_PREREQ dosfstools
 
 G_EXIT_CUSTOM()
 {
 	# Revert workarounds
-	G_EXEC rm -f rootfs/etc/systemd/system/dropbear.service rootfs/var/lib/dietpi/postboot.d/micha-remount_tmp.sh
-
+	G_EXEC rm -f rootfs/etc/systemd/system/dropbear.service
+	for i in rootfs/etc/systemd/system/*.service.d/no-credentials.conf
+	do
+		[[ $i == 'rootfs/etc/systemd/system/*.service.d/no-credentials.conf' ]] && break
+		G_EXEC rm "$i"
+		G_EXEC rmdir --ignore-fail-on-non-empty "${i%/no-credentials.conf}"
+	done
 	# Cleanup
 	findmnt -M rootfs > /dev/null && G_EXEC umount -Rl rootfs
 	G_EXEC losetup -d "$LOOP_DEV"
@@ -77,8 +82,7 @@ G_EXEC mount "$ROOT_DEV" rootfs
 # Workarounds
 # - Mask Dropbear to prevent its package install from failing
 ln -s /dev/null rootfs/etc/systemd/system/dropbear.service
-# - Remount /tmp tmpfs as it does not mount with intended size automatically somehow
-[[ -d 'rootfs/var/lib/dietpi/postboot.d' ]] && echo -e '#!/bin/dash\nmount -o remount /tmp' > rootfs/var/lib/dietpi/postboot.d/micha-remount_tmp.sh
+# - Prevent failing services and missing login prompt by disabling credentials in systemd units
 if [[ ${emulation_packages[0]} ]]
 then
 	for i in rootfs/lib/systemd/system/*.service
@@ -93,10 +97,7 @@ fi
 G_EXEC systemctl unmask dbus.socket dbus
 G_EXEC systemctl start dbus.socket dbus
 # Bind mounts required to allow container reading its own mount info
-abinds=()
-#abinds+=('--bind=/dev/fb0' '--bind=/dev/dri' '--bind=/dev/tty1')
-#abinds+=('--bind=/dev/gpiochip0' '--bind=/dev/gpiomem' '--bind=/sys/class/gpio' '--bind=/sys/devices/platform/soc/3f200000.gpio')
-systemd-nspawn -bD rootfs --bind="$LOOP_DEV" --bind="$ROOT_DEV" ${BOOT_DEV:+--bind="$BOOT_DEV"} --bind=/dev/disk "${abinds[@]}"
+systemd-nspawn -bD rootfs --bind="$LOOP_DEV" --bind="$ROOT_DEV" ${BOOT_DEV:+--bind="$BOOT_DEV"} --bind=/dev/disk
 
 exit 0
 }
