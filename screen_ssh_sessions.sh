@@ -2,8 +2,9 @@
 # Install and setup GNU Screen for SSH sessions
 # Created by MichaIng / micha@dietpi.com / dietpi.com
 {
+set -e
+
 # Install Screen
-apt-get -y update
 apt-get -y --no-install-recommends install screen
 
 # Disable startup message
@@ -44,5 +45,5 @@ _EOF_
 
 # Use dash as default shell to reduce overhead before screen is loaded
 usermod -s /usr/bin/dash root
-getent passwd dietpi > /dev/null && usermod -s /usr/bin/dash dietpi
+! getent passwd dietpi > /dev/null || usermod -s /usr/bin/dash dietpi
 }
