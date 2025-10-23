@@ -26,7 +26,7 @@ disable_error=1 G_CHECK_VALIDINT "$FS_IMG" 0 || FS_IMG=2
 
 # Install QEMU emulation support when running from x86_64 host
 (( $G_HW_ARCH == 10 )) && emulation_packages=('qemu-user-static') || emulation_packages=()
-G_AG_CHECK_INSTALL_PREREQ parted fdisk dbus systemd-container "${emulation_packages[@]}"
+G_AG_CHECK_INSTALL_PREREQ fdisk dbus systemd-container "${emulation_packages[@]}"
 [[ ${emulation_packages[0]} ]] && G_EXEC systemctl restart systemd-binfmt
 LOOP_DEV=$(losetup -f)
 ROOT_DEV="${LOOP_DEV}p$ROOT_PART"
@@ -64,9 +64,7 @@ then
 		G_AG_CHECK_INSTALL_PREREQ gdisk
 		G_EXEC sgdisk -e "$LOOP_DEV"
 	fi
-	G_EXEC_OUTPUT=1 G_EXEC eval "sfdisk -fN'${ROOT_DEV: -1}' '$LOOP_DEV' <<< ',+'"
-	G_EXEC partprobe "$LOOP_DEV"
-	G_EXEC partx -u "$LOOP_DEV"
+	G_EXEC_OUTPUT=1 G_EXEC eval "sfdisk -N'${ROOT_DEV: -1}' '$LOOP_DEV' <<< ',+'"
 	G_EXEC_OUTPUT=1 G_EXEC resize2fs "$ROOT_DEV"
 fi
 
