@@ -30,6 +30,7 @@ disable_error=1 G_CHECK_VALIDINT "$FS_IMG" 0 || FS_IMG=2
 # - Install QEMU emulation support when running from x86_64 host
 (( $G_HW_ARCH == 10 )) && emulation_packages=('qemu-user-static') || emulation_packages=()
 G_AG_CHECK_INSTALL_PREREQ fdisk dbus systemd-container "${dosfstools[@]}" "${emulation_packages[@]}"
+G_EXEC systemctl start dbus
 [[ ${emulation_packages[0]} ]] && G_EXEC systemctl restart systemd-binfmt
 
 # Obtain device paths
