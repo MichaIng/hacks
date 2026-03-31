@@ -82,7 +82,7 @@ echo
 # Memory usage
 # shellcheck disable=SC2016
 echo 'Total memory usage: "free -th | mawk '\''/^Total:/{print $3}'\''"'
-free -th | mawk '/^Total:/{print $3}'
+free -tm | mawk 'END {print $3" MiB"}'
 echo
 
 # Pre-installed packages
