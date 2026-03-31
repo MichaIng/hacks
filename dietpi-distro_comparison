@@ -122,7 +122,6 @@ then
 else
 	echo '/tmp is a dedicated mount, which is good to reduce disk I/O on rootfs, but it is no (known) RAM disk.'
 fi
-
 echo
 
 # Check for /var/log mount
@@ -145,7 +144,6 @@ then
 else
 	echo '/var/log is a dedicated mount, which is good to reduce disk I/O on rootfs. Since it is no (known) RAM disk, logs create disk I/O on another drive, but survive system crashes.'
 fi
-
 echo
 
 # SSH
@@ -157,5 +155,4 @@ Assure to run the script via SSH as well on other systems you want to compare.'
 else
 	echo 'This image has no SSH server pre-installed.'
 fi
-
 echo
