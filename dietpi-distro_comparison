@@ -3,7 +3,7 @@
 # It aims to make the comparison of different OS/distro images against each other easy and transparent.
 # It aims to replace the very outdated DietPi spreadsheet and comparisons, done in the past:
 # - https://docs.google.com/spreadsheets/d/1mDHGZC-H6tU6_O8kuLTG8d4A8Nt7lV1Q7MXTR_6qw30/edit#gid=0
-# - https://dietpi.com/phpbb/viewtopic.php?t=262
+# - https://dietpi.com/forum/t/dietpi-vs-raspbian-lite/216
 
 ### IMPORTANT ###
 # Execution instructions to assure fair, comparable and reproducible results on all tests:
@@ -11,21 +11,22 @@
 # - Only when there are significant differences, like one image necessarily requires a static IP to be set, do the same on DietPi via dietpi.txt, to make it better comparable.
 # - Use the same console to run the script on both systems, e.g. local console, SSH or serial console.
 # - Source the script, instead of executing it, to avoid additional processes and RAM usage for the script execution itself:
-#     curl -sSfLO https://raw.githubusercontent.com/MichaIng/hacks/main/dietpi-distro_comparison
-#     . ./dietpi-distro_comparison
+#     source <(curl -sSf https://raw.githubusercontent.com/MichaIng/hacks/main/dietpi-distro_comparison)
+
+export LC_ALL='C.UTF-8' LANG='C.UTF-8'
 
 # Wait for boot/login tasks to finish
-while pgrep -f 'postboot' > /dev/null
+while pgrep -x 'postboot' > /dev/null
 do
 	echo 'Waiting for DietPi-Postboot to finish'
 	sleep 1
 done
-while pgrep -f 'dietpi-update' > /dev/null
+while pgrep -x 'dietpi-update' > /dev/null
 do
 	echo 'Waiting for DietPi-Update to finish'
 	sleep 1
 done
-while pgrep -f 'apt-get' > /dev/null
+while pgrep -x 'apt-get' > /dev/null
 do
 	echo 'Waiting for APT calls to finish'
 	sleep 1
@@ -34,7 +35,7 @@ done
 # First of all, we bring the OS onto current package state and disable possibly generated swap files to make the comparison fair.
 if [[ ! -f '/dietpi-distro_comparison.flag' ]]
 then
-	echo -e '\nUpgrading all APT packages and removing all swap files...
+	echo -e '\nUpgrading all APT packages and removing all swap files ...
 NB: A flag file will be created to skip this on next script execution.\n'
 
 	# Disabling Bluetooth which leads to hanging boot on RPi's without onboard Bluetooth
@@ -68,9 +69,9 @@ fi
 total=0
 for i in / /boot /boot/efi /boot/firmware
 do
-	size=$(findmnt -Ufnrbo USED -M "$i")
+	size=$(findmnt -Ufnrbo USED "$i")
 	(( $size )) || continue
-	echo "$i filesystem disk usage: \"findmnt -Ufnrbo USED -M $i\""
+	echo "$i filesystem disk usage: \"findmnt -Ufnrbo USED $i\""
 	echo "$size bytes"
 	((total+=size))
 done
@@ -107,7 +108,7 @@ systemd-analyze | mawk '{print $(NF-1)" "$NF;exit}'
 echo
 
 # Check for /tmp mount
-tmp_mount=$(findmnt -Ufnro FSTYPE -M /tmp)
+tmp_mount=$(findmnt -Ufnro FSTYPE /tmp)
 if [[ ! $tmp_mount ]]
 then
 	echo '/tmp is no dedicated mount, which is bad since volatile files lead to rootfs disk I/O.'
@@ -120,7 +121,7 @@ elif [[ $tmp_mount == 'ramfs' ]]
 then
 	echo '/tmp is a ramfs, which is good to reduce disk I/O, but better switch to successor tmpfs.'
 	
-elif [[ $(findmnt -Ufnro SOURCE -M /tmp) == *'zram'* ]]
+elif [[ $(findmnt -Ufnro SOURCE /tmp) == *'zram'* ]]
 then
 	echo '/tmp is a zram mount, which is good to reduce disk I/O with minimal additional memory usage, but at the cost of additional CPU utilisation for (de)compression.'
 else
@@ -130,7 +131,7 @@ fi
 echo
 
 # Check for /var/log mount
-log_mount=$(findmnt -Ufnro FSTYPE -M /var/log)
+log_mount=$(findmnt -Ufnro FSTYPE /var/log)
 if [[ ! $log_mount ]]
 then
 	echo '/var/log is no dedicated mount, which is bad for disk I/O, but logs are preserved on system crash.'
@@ -143,7 +144,7 @@ elif [[ $log_mount == 'ramfs' ]]
 then
 	echo '/var/log is a ramfs, which is good to reduce disk I/O, but logs are lost on system crash. Also better switch to successor tmpfs.'
 	
-elif [[ $(findmnt -Ufnro SOURCE -M /var/log) == *'zram'* ]]
+elif [[ $(findmnt -Ufnro SOURCE /var/log) == *'zram'* ]]
 then
 	echo '/var/log is a zram mount, which is good to reduce disk I/O with minimal additional memory usage, but at the cost of additional CPU utilisation for (de)compression. Logs are however lost on system crash.'
 else
