@@ -41,25 +41,25 @@ NB: A flag file will be created to skip this on next script execution.\n'
 	# Disabling Bluetooth which leads to hanging boot on RPi's without onboard Bluetooth
 	systemctl is-failed hciuart &> /dev/null && systemctl disable --now hciuart
 
-	apt-get -y update
-	apt-get -y dist-upgrade
-	apt-get -y autopurge
+	apt-get -y update || exit 1
+	apt-get -y dist-upgrade || exit 1
+	apt-get -y autopurge || exit 1
 
 	[[ -f '/boot/dietpi/func/dietpi-set_swapfile' ]] && /boot/dietpi/func/dietpi-set_swapfile 0
 	if command -v dphys-swapfile > /dev/null
 	then
-		dphys-swapfile swapoff
-		dphys-swapfile uninstall
+		dphys-swapfile swapoff || exit 1
+		dphys-swapfile uninstall || exit 1
 	fi
 	while read -r file
 	do
-		swapoff "$file"
-		[[ -f $file ]] && rm -v "$file"
+		swapoff "$file" || exit 1
+		[[ -f $file ]] && { rm -v "$file" || exit 1; }
 
 	done < <(swapon --show NAME --noheadings | mawk '{print $1}')
 	sed -i '/[[:blank:]]swap[[:blank:]]/d' /etc/fstab
 
-	> /dietpi-distro_comparison.flag
+	> /dietpi-distro_comparison.flag || exit 1
 	read -rp 'The system will now reboot, press any key to continue...'
 	reboot
 	exit 0
@@ -77,34 +77,29 @@ do
 done
 echo "Total disk usage:"
 echo "$((total/1024**2)) MiB"
-
 echo
 
 # Memory usage
 # shellcheck disable=SC2016
 echo 'Total memory usage: "free -th | mawk '\''/^Total:/{print $3}'\''"'
 free -th | mawk '/^Total:/{print $3}'
-
 echo
 
 # Pre-installed packages
 echo 'Number of pre-installed DEB packages: "dpkg --get-selections | wc -l"'
 dpkg --get-selections | wc -l
-
 echo
 
 # Processes
 # shellcheck disable=SC2016
 echo 'Number of running processes: "echo $(( $(pstree -Ta | wc -l) - 3 ))" (minus echo, pstree and wc)'
 echo $(( $(pstree -Ta | wc -l) - 3 ))
-
 echo
 
 # Boot duration
 # shellcheck disable=SC2016
 echo 'Boot duration: "systemd-analyze | mawk '\''{print $(NF-1)" "$NF;exit}'\''"'
 systemd-analyze | mawk '{print $(NF-1)" "$NF;exit}'
-
 echo
 
 # Check for /tmp mount
