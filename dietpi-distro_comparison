@@ -42,7 +42,7 @@ NB: A flag file will be created to skip this on next script execution.\n'
 	apt-get -y dist-upgrade || kill -INT $$
 	apt-get -y autopurge || kill -INT $$
 
-	[[ -f '/boot/dietpi/func/dietpi-set_swapfile' ]] && { /boot/dietpi/func/dietpi-set_swapfile 0; kill -INT $$; }
+	[[ -f '/boot/dietpi/func/dietpi-set_swapfile' ]] && { /boot/dietpi/func/dietpi-set_swapfile 0 || kill -INT $$; }
 	if command -v dphys-swapfile > /dev/null
 	then
 		dphys-swapfile swapoff || kill -INT $$
