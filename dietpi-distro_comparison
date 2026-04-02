@@ -38,31 +38,32 @@ then
 	echo -e '\nUpgrading all APT packages and removing all swap files ...
 NB: A flag file will be created to skip this on next script execution.\n'
 
-	# Disabling Bluetooth which leads to hanging boot on RPi's without onboard Bluetooth
-	systemctl is-failed hciuart &> /dev/null && systemctl disable --now hciuart
+	apt-get -y update || kill -INT $$
+	apt-get -y dist-upgrade || kill -INT $$
+	apt-get -y autopurge || kill -INT $$
 
-	apt-get -y update || exit 1
-	apt-get -y dist-upgrade || exit 1
-	apt-get -y autopurge || exit 1
-
-	[[ -f '/boot/dietpi/func/dietpi-set_swapfile' ]] && /boot/dietpi/func/dietpi-set_swapfile 0
+	[[ -f '/boot/dietpi/func/dietpi-set_swapfile' ]] && { /boot/dietpi/func/dietpi-set_swapfile 0; kill -INT $$; }
 	if command -v dphys-swapfile > /dev/null
 	then
-		dphys-swapfile swapoff || exit 1
-		dphys-swapfile uninstall || exit 1
+		dphys-swapfile swapoff || kill -INT $$
+		dphys-swapfile uninstall || kill -INT $$
 	fi
 	while read -r file
 	do
-		swapoff "$file" || exit 1
-		[[ -f $file ]] && { rm -v "$file" || exit 1; }
+		swapoff "$file" || kill -INT $$
+		[[ -f $file ]] && { rm -v "$file" || kill -INT $$; }
 
 	done < <(swapon --show NAME --noheadings | mawk '{print $1}')
-	sed -i '/[[:blank:]]swap[[:blank:]]/d' /etc/fstab
+	sed -i '/[[:blank:]]swap[[:blank:]]/d' /etc/fstab || kill -INT $$
 
-	> /dietpi-distro_comparison.flag || exit 1
+	# Swap file created on RPi OS despite remaining unused
+	[[ -f '/etc/rpi/swap.conf' ]] && { sed -i '/RamMultiplier=/c\RamMultiplier=0' /etc/rpi/swap.conf || kill -INT $$; }
+	[[ -f '/var/swap' ]] && { rm -v /var/swap || kill -INT $$; }
+
+	> /dietpi-distro_comparison.flag || kill -INT $$
 	read -rp 'The system will now reboot, press any key to continue...'
 	reboot
-	exit 0
+	kill -INT $$
 fi
 
 # Disk usage
