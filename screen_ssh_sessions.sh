@@ -35,6 +35,9 @@ altscreen on
 
 # Add information status line to screen windows
 caption always "%{Gk}%-w%{kG}%n %t%{-}%+w"
+
+# Disable stupid 5 seconds wait
+msgwait 0
 _EOF_
 
 # Automatically start screen on SSH sessions
