@@ -35,6 +35,8 @@ altscreen on
 
 # Add information status line to screen windows
 caption always "%{Gk}%-w%{kG}%n %t%{-}%+w"
+# Forky and above needs different color codes:
+#caption always "%{10;0}%-w%{0;10}%n %t%{-}%+w"
 
 # Disable stupid 5 seconds wait
 msgwait 0
