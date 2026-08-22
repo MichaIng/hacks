@@ -22,7 +22,7 @@ sed -Ei '/^#hardstatus[[:blank:]]+(on|off)/c\hardstatus off' /etc/screenrc
 sed -i '/^[[:blank:]#]*termcapinfo xterm|xterms|xs|rxvt ti@:te@$/c\termcapinfo xterm|xterms|xs|rxvt ti@:te@' /etc/screenrc
 
 # Additions
-cat << '_EOF_' >> /etc/screenrc
+grep -q 'MICHA' /etc/screenrc || cat << '_EOF_' >> /etc/screenrc
 # ------------------------------------------------------------------------------
 # MICHA'S ADDITIONS
 # ------------------------------------------------------------------------------
