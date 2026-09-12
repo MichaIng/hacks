@@ -27,7 +27,7 @@ G_EXEC systemctl disable --now getty@tty1
 
 # Install SFTP server
 G_AGI gesftpserver
-#G_EXEC ln -s /usr/libexec/gesftpserver /usr/lib/openssh/sftp-server
+#G_EXEC ln -s /usr/libexec/gesftpserver /usr/lib/sftp-server
 
 # Configure Redis
 G_CONFIG_INJECT 'bind[[:blank:]]' 'bind ""' /etc/redis/redis.conf
