@@ -45,8 +45,8 @@ G_EXEC curl -sSfo /etc/php/*/mods-available/micha.ini 'https://raw.githubusercon
 G_EXEC phpenmod micha
 
 # Configure PHP
-G_EXEC phpenmod apcu ctype curl dom exif fileinfo gd gmp igbinary intl mbstring mysqlnd opcache pdo pdo_mysql posix redis simplexml xml xmlreader xmlwriter zip
-G_EXEC phpdismod calendar ffi ftp gettext iconv mysqli phar readline shmop sockets sysvmsg sysvsem sysvshm tokenizer xsl
+G_EXEC phpenmod apcu ctype curl dom exif fileinfo gd gmp iconv igbinary intl mbstring mysqlnd opcache pdo pdo_mysql posix redis simplexml xml xmlreader xmlwriter zip
+G_EXEC phpdismod calendar ffi ftp gettext mysqli phar readline shmop sockets sysvmsg sysvsem sysvshm tokenizer xsl
 
 # Configure Apache2
 G_EXEC_NOHALT=1 G_EXEC a2disconf security other-vhosts-access-log charset localized-error-pages serve-cgi-bin
