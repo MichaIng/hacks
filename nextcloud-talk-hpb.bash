@@ -131,6 +131,13 @@ sed --follow-symlinks -i "/^[[:blank:]#]*turn_rest_api_key[[:blank:]]/c\\\tturn_
 sed --follow-symlinks -i '/^[[:blank:]#]*interface[[:blank:]]/c\\tinterface = "lo"' /etc/janus/janus.transport.http.jcfg
 sed --follow-symlinks -i '/^[[:blank:]#]*ws_interface[[:blank:]]/c\\tws_interface = "lo"' /etc/janus/janus.transport.websockets.jcfg
 
+# - Event broadcast: https://github.com/strukturag/nextcloud-spreed-signaling#setup-of-janus
+sed --follow-symlinks -i '/events: {/,/^}/s/^[[:blank:]#]*broadcast[[:blank:]].*$/\tbroadcast = true/' /etc/janus/janus.jcfg
+sed --follow-symlinks -i '/^[[:blank:]#]*enabled[[:blank:]]/c\\tenabled = true' /etc/janus/janus.eventhandler.wsevh.jcfg
+sed --follow-symlinks -i "/^[[:blank:]#]*backend[[:blank:]]/c\\\tbackend = \"wss://127.0.0.1:$signalingport/spreed\"" /etc/janus/janus.eventhandler.wsevh.jcfg
+sed --follow-symlinks -i '/^[[:blank:]#]*subprotocol[[:blank:]]/c\\tsubprotocol = "janus-events"' /etc/janus/janus.eventhandler.wsevh.jcfg
+sed --follow-symlinks -i '/^[[:blank:]#]*events_cap_on_reconnect[[:blank:]]/c\\tevents_cap_on_reconnect = 1000' /etc/janus/janus.eventhandler.wsevh.jcfg
+
 ### NATS ###
 
 # Install
