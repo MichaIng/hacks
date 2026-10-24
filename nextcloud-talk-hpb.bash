@@ -23,10 +23,10 @@ cp server.conf.in server.conf
 chmod 0600 server.conf
 chown signaling:0 server.conf
 
-port=$(od -An -N5 -tu1 /dev/urandom | mawk '{printf "%d", 1+($1 % 5); for (i=2; i<=5; i++) printf "%d", $i % 10}')
+signalingport=$(od -An -N5 -tu1 /dev/urandom | mawk '{printf "%d", 1+($1 % 5); for (i=2; i<=5; i++) printf "%d", $i % 10}')
 sed --follow-symlinks -i '/^[[:blank:]#]*certificate[[:blank:]=]/c\certificate = /mnt/dietpi_userdata/signaling/fullchain.pem' server.conf
 sed --follow-symlinks -i '/^[[:blank:]#]*key[[:blank:]=]/c\key = /mnt/dietpi_userdata/signaling/privkey.pem' server.conf
-sed --follow-symlinks -i "/^\[https\]/,/^\[.*\]/s/^[[:blank:]#]*listen[[:blank:]=].*\$/listen = 0.0.0.0:$port/" server.conf
+sed --follow-symlinks -i "/^\[https\]/,/^\[.*\]/s/^[[:blank:]#]*listen[[:blank:]=].*\$/listen = 0.0.0.0:$signalingport/" server.conf
 
 hashkey=$(openssl rand -hex 16)
 blockkey=$(openssl rand -hex 16)
@@ -220,3 +220,10 @@ SystemCallFilter=~@privileged @resources
 [Install]
 WantedBy=multi-user.target
 _EOF_
+
+systemctl daemon-reload
+systemctl enable janus nats signaling
+systemctl restart janus nats
+/etc/letsencrypt/renewal-hooks/deploy/signaling.sh
+sleep 2
+curl -v "https://$domain:$signalingport/api/v1/welcome"
