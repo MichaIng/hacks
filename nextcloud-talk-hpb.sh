@@ -23,11 +23,13 @@ cp server.conf.in server.conf
 chmod 0600 server.conf
 chown signaling:0 server.conf
 
+# HTTPS listener
 signalingport=$(od -An -N5 -tu1 /dev/urandom | mawk '{printf "%d", 1+($1 % 5); for (i=2; i<=5; i++) printf "%d", $i % 10}')
 sed --follow-symlinks -i '/^[[:blank:]#]*certificate[[:blank:]=]/c\certificate = /mnt/dietpi_userdata/signaling/fullchain.pem' server.conf
 sed --follow-symlinks -i '/^[[:blank:]#]*key[[:blank:]=]/c\key = /mnt/dietpi_userdata/signaling/privkey.pem' server.conf
 sed --follow-symlinks -i "/^\[https\]/,/^\[.*\]/s/^[[:blank:]#]*listen[[:blank:]=].*\$/listen = 0.0.0.0:$signalingport/" server.conf
 
+# Internal secrets
 hashkey=$(openssl rand -hex 16)
 blockkey=$(openssl rand -hex 16)
 secret=$(openssl rand -hex 16)
@@ -35,6 +37,7 @@ sed --follow-symlinks -i "/^[[:blank:]#]*hashkey[[:blank:]=]/c\hashkey = $hashke
 sed --follow-symlinks -i "/^[[:blank:]#]*blockkey[[:blank:]=]/c\blockkey = $blockkey" server.conf
 sed --follow-symlinks -i "/^[[:blank:]#]*internalsecret[[:blank:]=]/c\internalsecret = $secret" server.conf
 
+# Backend: Reuse "backend-id" dummy backend name for simplicity, comments in place, and slim diff
 domain=$(sed -n '/^[[:blank:]]*SOFTWARE_PUBLIC_DOMAIN_NAME=/{s/^[^=]*=//p;q}' /boot/dietpi.txt)
 secret=$(openssl rand -hex 16)
 sed --follow-symlinks -i '/^#*backends[[:blank:]=]/c\backends = backend-id' server.conf
@@ -42,33 +45,20 @@ sed --follow-symlinks -i '/^#*\[backend-id\]/c\[backend-id]' server.conf
 sed --follow-symlinks -i "/^\[backend-id\]/,/^#*\[.*\]/s|^[[:blank:]#]*urls[[:blank:]=].*\$|urls = https://$domain/nextcloud|" server.conf
 sed --follow-symlinks -i "/^\[backend-id\]/,/^#*\[.*\]/s/^[[:blank:]#]*secret[[:blank:]=].*\$/secret = $secret/" server.conf
 
+# WebRTC gateway Janus
 sed --follow-symlinks -i '/^\[mcu\]/,/^#*\[.*\]/s/^[[:blank:]#]*type[[:blank:]=].*$/type = janus/' server.conf
 sed --follow-symlinks -i '/^\[mcu\]/,/^#*\[.*\]/s|^[[:blank:]#]*url[[:blank:]=].*$|url = ws://127.0.0.1:8188|' server.conf
 
+# NATS: Use internal loopback client
+sed --follow-symlinks -i '/^\[nats\]/,/^\[.*\]/s|^[[:blank:]#]*url[[:blank:]=].*$|url = nats://loopback|' server.conf
+
+# TURN
 apikey=$(openssl rand -base64 16)
 secret=$(sed -n '/^[[:blank:]]*static-auth-secret=/{s/^[^=]*=//p;q}' /etc/turnserver.conf)
 port=$(sed -n '/^[[:blank:]]*listening-port=/{s/^[^=]*=//p;q}' /etc/turnserver.conf)
 sed --follow-symlinks -i "/^\[turn\]/,/^#*\[.*\]/s|^[[:blank:]#]*apikey[[:blank:]=].*\$|apikey = $apikey|" server.conf
 sed --follow-symlinks -i "/^\[turn\]/,/^#*\[.*\]/s/^[[:blank:]#]*secret[[:blank:]=].*\$/secret = $secret/" server.conf
 sed --follow-symlinks -i "/^\[turn\]/,/^#*\[.*\]/s/^[[:blank:]#]*servers[[:blank:]=].*\$/servers = turn:127.0.0.1:$port?transport=udp,turn:127.0.0.1:$port?transport=tcp/" server.conf
-
-# Certbot hook
-cat << _EOF_ > /etc/letsencrypt/renewal-hooks/deploy/signaling.sh || exit 1
-#!/bin/dash -e
-# Ensure strict permissions while copying:
-umask 377
-
-# Copy to Nextcloud Talk Signaling server dir
-cp /etc/letsencrypt/live/*/fullchain.pem /mnt/dietpi_userdata/signaling/
-cp /etc/letsencrypt/live/*/privkey.pem /mnt/dietpi_userdata/signaling/
-
-# Re-Own those certs!
-chown signaling:0 /mnt/dietpi_userdata/signaling/fullchain.pem /mnt/dietpi_userdata/signaling/privkey.pem
-
-# Restart Nextcloud Talk Signaling server to use new cert
-systemctl restart signaling
-_EOF_
-chmod +x /etc/letsencrypt/renewal-hooks/deploy/signaling.sh
 
 # Service: https://github.com/strukturag/nextcloud-spreed-signaling/blob/master/dist/init/systemd/signaling.service
 cat << '_EOF_' > /etc/systemd/system/signaling.service  || exit 1
@@ -117,6 +107,24 @@ SystemCallFilter=~@privileged
 WantedBy=multi-user.target
 _EOF_
 
+# Certbot hook
+cat << _EOF_ > /etc/letsencrypt/renewal-hooks/deploy/signaling.sh || exit 1
+#!/bin/dash -e
+# Ensure strict permissions while copying:
+umask 377
+
+# Copy to Nextcloud Talk Signaling server dir
+cp /etc/letsencrypt/live/*/fullchain.pem /mnt/dietpi_userdata/signaling/
+cp /etc/letsencrypt/live/*/privkey.pem /mnt/dietpi_userdata/signaling/
+
+# Re-Own those certs!
+chown signaling:0 /mnt/dietpi_userdata/signaling/fullchain.pem /mnt/dietpi_userdata/signaling/privkey.pem
+
+# Restart Nextcloud Talk Signaling server to use new cert
+systemctl restart signaling
+_EOF_
+chmod +x /etc/letsencrypt/renewal-hooks/deploy/signaling.sh
+
 ### Janus ###
 
 # Install
@@ -128,18 +136,32 @@ sed --follow-symlinks -i "/^[[:blank:]#]*stun_port[[:blank:]]/c\\\tstun_port = $
 sed --follow-symlinks -i '/^[[:blank:]#]*full_trickle[[:blank:]]/c\\tfull_trickle = true' /etc/janus/janus.jcfg
 sed --follow-symlinks -i "/^[[:blank:]#]*turn_rest_api_key[[:blank:]]/c\\\tturn_rest_api_key = \"$apikey\"" /etc/janus/janus.jcfg
 
+# Bind to loopback
 sed --follow-symlinks -i '/^[[:blank:]#]*interface[[:blank:]]/c\\tinterface = "lo"' /etc/janus/janus.transport.http.jcfg
 sed --follow-symlinks -i '/^[[:blank:]#]*ws_interface[[:blank:]]/c\\tws_interface = "lo"' /etc/janus/janus.transport.websockets.jcfg
 
-# - Event broadcast: https://github.com/strukturag/nextcloud-spreed-signaling#setup-of-janus
+# Event broadcast: https://github.com/strukturag/nextcloud-spreed-signaling#setup-of-janus
 sed --follow-symlinks -i '/events: {/,/^}/s/^[[:blank:]#]*broadcast[[:blank:]].*$/\tbroadcast = true/' /etc/janus/janus.jcfg
 sed --follow-symlinks -i '/^[[:blank:]#]*enabled[[:blank:]]/c\\tenabled = true' /etc/janus/janus.eventhandler.wsevh.jcfg
 sed --follow-symlinks -i "/^[[:blank:]#]*backend[[:blank:]]/c\\\tbackend = \"wss://127.0.0.1:$signalingport/spreed\"" /etc/janus/janus.eventhandler.wsevh.jcfg
 sed --follow-symlinks -i '/^[[:blank:]#]*subprotocol[[:blank:]]/c\\tsubprotocol = "janus-events"' /etc/janus/janus.eventhandler.wsevh.jcfg
 sed --follow-symlinks -i '/^[[:blank:]#]*events_cap_on_reconnect[[:blank:]]/c\\tevents_cap_on_reconnect = 1000' /etc/janus/janus.eventhandler.wsevh.jcfg
 
-### NATS ###
+### Finish ###
 
+systemctl daemon-reload
+systemctl enable janus signaling
+systemctl restart janus
+/etc/letsencrypt/renewal-hooks/deploy/signaling.sh
+sleep 2
+curl -v "https://$domain:$signalingport/api/v1/welcome"
+exit 0
+
+### Optional: NATS ###
+
+# Not needed for a single local instance
+Install_NATS()
+{
 # Install
 case $G_HW_ARCH in
 	1) arch='arm6';;
@@ -171,30 +193,8 @@ cat << _EOF_ > /mnt/dietpi_userdata/nats/nats.conf || exit 1
 # /mnt/dietpi_userdata/nats/nats.conf
 host: 127.0.0.1
 port: $port
-#tls {
-#    cert_file: "/mnt/dietpi_userdata/nats/fullchain.pem"
-#    key_file:  "/mnt/dietpi_userdata/nats/privkey.pem"
-#}
 _EOF_
 sed --follow-symlinks -i "/^\[nats\]/,/^\[.*\]/s|^[[:blank:]#]*url[[:blank:]=].*\$|url = nats://127.0.0.1:$port|" server.conf
-
-# Certbot hook
-# cat << _EOF_ > /etc/letsencrypt/renewal-hooks/deploy/nats.sh || exit 1
-# #!/bin/dash -e
-# # Ensure strict permissions while copying:
-# umask 377
-
-# # Copy to NATS config dir
-# cp /etc/letsencrypt/live/*/fullchain.pem /mnt/dietpi_userdata/nats/
-# cp /etc/letsencrypt/live/*/privkey.pem /mnt/dietpi_userdata/nats/
-
-# # Re-Own those certs!
-# chown nats:0 /mnt/dietpi_userdata/nats/fullchain.pem /mnt/dietpi_userdata/nats/privkey.pem
-
-# # Restart Nextcloud Talk Signaling server to use new cert
-# systemctl restart nats
-# _EOF_
-# chmod +x /etc/letsencrypt/renewal-hooks/deploy/nats.sh
 
 # Service: https://docs.nats.io/learn/deployment/hardening#a-hardened-systemd-unit
 cat << '_EOF_' > /etc/systemd/system/nats.service || exit 1
@@ -228,9 +228,27 @@ SystemCallFilter=~@privileged @resources
 WantedBy=multi-user.target
 _EOF_
 
-systemctl daemon-reload
-systemctl enable janus nats signaling
-systemctl restart janus nats
-/etc/letsencrypt/renewal-hooks/deploy/signaling.sh
-sleep 2
-curl -v "https://$domain:$signalingport/api/v1/welcome"
+# Optional: TLS: This requires a valid cert, and hence the NATS server to not bind to loopback, or the public hostname to resolve to the loopback IP 127.0.0.1 directly, rather than the public IP or even 127.0.1.1.
+#tls {
+#    cert_file: "/mnt/dietpi_userdata/nats/fullchain.pem"
+#    key_file:  "/mnt/dietpi_userdata/nats/privkey.pem"
+#}
+
+# # Certbot hook
+# cat << _EOF_ > /etc/letsencrypt/renewal-hooks/deploy/nats.sh || exit 1
+# #!/bin/dash -e
+# # Ensure strict permissions while copying:
+# umask 377
+
+# # Copy to NATS config dir
+# cp /etc/letsencrypt/live/*/fullchain.pem /mnt/dietpi_userdata/nats/
+# cp /etc/letsencrypt/live/*/privkey.pem /mnt/dietpi_userdata/nats/
+
+# # Re-Own those certs!
+# chown nats:0 /mnt/dietpi_userdata/nats/fullchain.pem /mnt/dietpi_userdata/nats/privkey.pem
+
+# # Restart Nextcloud Talk Signaling server to use new cert
+# systemctl restart nats
+# _EOF_
+# chmod +x /etc/letsencrypt/renewal-hooks/deploy/nats.sh
+}
