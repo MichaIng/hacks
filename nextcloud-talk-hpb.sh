@@ -13,7 +13,7 @@ apt install make
 cd /mnt/dietpi_userdata
 git clone 'https://github.com/strukturag/nextcloud-spreed-signaling' signaling
 cd signaling
-make build
+make server
 
 # User
 useradd -rMN -d /mnt/dietpi_userdata/signaling -s /usr/sbin/nologin signaling
